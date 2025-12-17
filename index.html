@@ -1,0 +1,2432 @@
+<!DOCTYPE html>
+
+<html lang="tr">
+<head>
+<link rel="manifest" href="./manifest.json">
+<meta content="#10b981" name="theme-color"/>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () =>
+      navigator.serviceWorker.register('./service-worker.js')
+    );
+  }
+
+  function updateCallButtons(){
+    const s = CURRENT || {};
+    const studentTel = (s.phone || '').replace(/\s+/g,'');
+    const motherTel  = (s.motherPhone || '').replace(/\s+/g,'');
+    const fatherTel  = (s.fatherPhone || '').replace(/\s+/g,'');
+    const relativeTel= (s.relativePhone || '').replace(/\s+/g,'');
+
+    const callStudent = document.getElementById('btnCallStudent');
+    const callMother  = document.getElementById('btnCallMother');
+    const callFather  = document.getElementById('btnCallFather');
+
+    if (callStudent) callStudent.href = studentTel ? `tel:${studentTel}` : '#';
+    if (callMother)  callMother.href  = motherTel  ? `tel:${motherTel}`  : (relativeTel ? `tel:${relativeTel}` : '#');
+
+    if (callFather){
+      if (fatherTel) callFather.href = `tel:${fatherTel}`;
+      else if (relativeTel) callFather.href = `tel:${relativeTel}`;
+      else callFather.href = '#';
+    }
+  }
+</script>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Rehberlik Sistemi</title>
+<style>
+    :root{
+      --bg:#0f172a;--card:#111827;--muted:#94a3b8;--accent:#10b981;--danger:#ef4444;--border:#1f2937
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,"Helvetica Neue",Arial;background:var(--bg);color:#e5e7eb}
+    header{position:sticky;top:0;z-index:5;background:rgba(15,23,42,.85);backdrop-filter:saturate(180%) blur(8px);border-bottom:1px solid var(--border)}
+    .wrap{max-width: 1240px;margin:0 auto;padding:16px}
+    h1{font-size:22px;margin:0}
+    .grid{display:grid;gap:14px}
+    .grid-2{grid-template-columns:1fr 1fr}
+    @media(max-width:900px){.grid-2{grid-template-columns:1fr}}
+    .card{background:#0b1220;border:1px solid var(--border);border-radius:14px;padding:14px}
+    .row{display:flex;gap:10px;align-items:center}
+    .row-between{display:flex;align-items:center;justify-content:space-between}
+    .muted{color:var(--muted)}
+    input,select,textarea,button{font:inherit}
+    input,select,textarea{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:#0b1220;color:#e5e7eb}
+    textarea{min-height:90px;resize:vertical}
+    .btn{padding:10px 14px;border-radius:12px;border:1px solid var(--border);background:#0b1220;color:#e5e7eb;cursor:pointer}
+    .btn:hover{filter:brightness(1.1)}
+    .btn-primary{background:linear-gradient(180deg, rgba(16,185,129,.98), rgba(5,150,105,.98));border-color:#0e9f6e;color:#06281b;font-weight:700;box-shadow:0 1px 0 rgba(0,0,0,.25)}
+    .btn-sm{padding:6px 10px;border-radius:10px;border:1px solid var(--border);background:#0b1220;color:#e5e7eb;cursor:pointer;font-size:12px}
+    .btn-sm:hover{filter:brightness(1.1)}
+    .btn-danger{border-color:#7f1d1d;color:#fecaca}
+    .item{display:flex;justify-content:space-between;gap:10px;padding:12px;border-radius:12px;border:1px solid var(--border);background:#0b1220}
+    .item:hover{border-color:#334155}
+    .name-pill{font-weight:700}
+    .name-pill.green{color:var(--accent)}
+    .name-pill.red{color:var(--danger)}
+    .error{background:#331619;border:1px solid #7f1d1d;color:#fecaca;padding:10px 12px;border-radius:12px;margin:10px 0}
+    .ok{background:#06281b;border:1px solid #065f46;color:#bbf7d0;padding:10px 12px;border-radius:12px;margin:10px 0}
+    .hidden{display:none!important}
+    .gap-6{gap:6px}
+  
+    /* --- Enhancements --- */
+    :root{
+      --tone1:#14b8a6; /* teal */
+      --tone2:#60a5fa; /* blue */
+      --tone3:#a78bfa; /* purple */
+    }
+    .btn{position:relative;font-weight:600;box-shadow:0 1px 0 rgba(0,0,0,.25)}
+    .btn:focus{outline:2px solid rgba(255,255,255,.15);outline-offset:2px}
+    .btn-tone1{background:linear-gradient(180deg, rgba(20,184,166,.95), rgba(13,148,136,.95));border-color:#0f766e;color:#06281b}
+    .btn-tone2{background:linear-gradient(180deg, rgba(96,165,250,.95), rgba(59,130,246,.95));border-color:#1d4ed8;color:#071a36}
+    .btn-tone3{background:linear-gradient(180deg, rgba(167,139,250,.95), rgba(139,92,246,.95));border-color:#6d28d9;color:#160a33}
+    .btn-tone1:hover, .btn-tone2:hover, .btn-tone3:hover{filter:none;transform:translateY(-1px)}
+    .btn-tone1:active, .btn-tone2:active, .btn-tone3:active{transform:translateY(0)}
+
+    /* Key/Value list for student detail */
+    .kv-row{display:grid;grid-template-columns:160px 1fr;align-items:center;gap:8px;padding:6px 0;border-bottom:1px dashed var(--border)}
+    .kv-row .k{color:var(--muted);font-weight:600;opacity:.9}
+    .kv-row .v{word-break:break-word}
+    .kv-row:last-of-type{border-bottom:none}
+
+
+    /* --- Student info compact tile layout --- */
+    .kv-container{columns:2;column-gap:16px}
+    @media (max-width: 720px){ .kv-container{columns:1} }
+    .kv-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;
+            border:1px solid var(--border);border-radius:12px;background:rgba(0,0,0,.03);margin:0 0 10px 0}
+    .kv-row .k{color:var(--muted);font-weight:600}
+    .kv-row .v{font-weight:700}
+    /* Make cards full width in detail column */
+    #detailView .card{width:100%}
+
+
+    /* longbox */
+    .longbox{border:1px solid var(--border);border-radius:12px;background:rgba(0,0,0,.03);padding:10px 12px;margin-top:8px}
+    .longbox .title{color:var(--muted);font-weight:700;margin-bottom:6px}
+    .longbox .body{white-space:pre-wrap;line-height:1.45}
+    
+/* --- Button color enhancements for non-call buttons --- */
+.btn:not(.btn-tone1):not(.btn-tone2):not(.btn-tone3):not(.btn-primary){
+  background:linear-gradient(180deg, #1a2338, #101827);
+  border-color:#2c3a52;
+  color:#f1f5f9;
+}
+.btn:not(.btn-tone1):not(.btn-tone2):not(.btn-tone3):hover{
+  filter:none;
+  background:linear-gradient(180deg, #24314a, #162032);
+}
+.btn-primary{
+  background:linear-gradient(180deg, rgba(18,200,140,1), rgba(10,130,90,1));
+  border-color:#0e9f6e;
+  color:#06281b;
+  font-weight:700;
+  box-shadow:0 2px 4px rgba(0,0,0,0.25);
+}
+
+
+/* --- Enlarge login button --- */
+#btnLogin {
+  padding: 14px 18px !important;
+  font-size: 17px !important;
+  border-radius: 14px !important;
+}
+
+
+/* === Hesabım menüsü === */
+.account-wrap { position: relative; }
+.account-btn { display:flex; align-items:center; gap:8px; }
+.account-avatar { width:28px; height:28px; border-radius:999px; background:linear-gradient(180deg,#1f2937,#0b1220); display:inline-block; }
+.dropdown { position:absolute; right:0; top:100%; margin-top:8px; min-width:220px;
+  background:#0b1220; border:1px solid var(--border); border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,.35); padding:8px; z-index:50 }
+.dropdown.hidden { display:none; }
+.dropdown .item { display:block; width:100%; text-align:left; padding:8px 10px; border-radius:10px; background:transparent; border:none; color:#e5e7eb; cursor:pointer; }
+.dropdown .item:hover { background:rgba(255,255,255,.04); }
+.dropdown .divider { height:1px; background:var(--border); margin:6px 0; }
+.dropdown .section-title { font-size:12px; color:var(--muted); padding:6px 10px; }
+@media (max-width:600px){ .dropdown{ right:8px } }
+
+/* === Bildirimler & Rozet === */
+.badge {
+  display:inline-block; min-width:16px; padding:0 5px; height:18px; line-height:18px;
+  font-size:11px; text-align:center; border-radius:10px; background:#ef4444; color:white;
+  margin-left:6px;
+}
+.notif-list { display:grid; gap:8px; }
+.notif-item { border:1px solid var(--border); background:#0b1220; border-radius:12px; padding:10px 12px; }
+.notif-item .t { font-weight:800; }
+.notif-item .m { white-space:pre-wrap; margin-top:6px }
+.pending-users { display:grid; gap:8px; }
+.pending-users .u { border:1px solid var(--border); background:#0b1220; border-radius:12px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center; }
+.pending-users .email { font-weight:700; }
+.btn-approve { background:linear-gradient(180deg, rgba(96,165,250,.95), rgba(59,130,246,.95)); border-color:#1d4ed8; color:#071a36; }
+.btn-reject  { border-color:#7f1d1d; color:#fecaca; }
+
+/* Compact notifications button */
+#btnNotifications{ padding:6px 10px !important; font-size:12px !important; border-radius:10px !important; }
+#btnNotifications .badge{ transform: translateY(-1px); }
+
+/* === Contrast fixes for notifications (works in dark & light modes) === */
+:root { --card-bg-dark:#0b1220; --card-fg-dark:#e5e7eb; --card-bg-light:#f8fafc; --card-fg-light:#0f172a; }
+@media (prefers-color-scheme: dark){
+  .notif-item { background: var(--card-bg-dark) !important; color: var(--card-fg-dark) !important; }
+  .notif-item .t, .notif-item .m { color: var(--card-fg-dark) !important; }
+}
+@media (prefers-color-scheme: light){
+  .notif-item { background: var(--card-bg-light) !important; color: var(--card-fg-light) !important; border-color:#e5e7eb !important; }
+  .notif-item .t, .notif-item .m { color: var(--card-fg-light) !important; }
+}
+/* Fallback when no color scheme is available */
+.notif-item { background: var(--card-bg-dark); color: var(--card-fg-dark); }
+.notif-item .t, .notif-item .m { color: var(--card-fg-dark); }
+
+/* Top-left title style fix */
+#btnHome { color: inherit !important; opacity: .95; }
+#btnHome:hover { text-decoration: none; opacity: 1; filter: brightness(1.05); }
+
+/* Inputs in dialogs */
+dialog input, dialog textarea { background:#0b1220; color:#e5e7eb; border:1px solid var(--border); border-radius:10px; padding:8px; }
+dialog input::placeholder, dialog textarea::placeholder { color: #94a3b8; }
+</style>
+<style>
+/* === Header buttons: unified sizing & elegant look === */
+#btnNewStudent, #btnNotifications, #btnSettings, #btnAccount, #btnWeeklyPlan {
+  height: 40px !important;
+  min-width: 140px !important;
+  padding: 0 16px !important;
+  border-radius: 12px !important;
+  font-weight: 700 !important;
+  font-size: 14px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,.25) !important;
+  transition: transform .15s ease, filter .15s ease !important;
+}
+#btnNewStudent:hover, #btnNotifications:hover, #btnSettings:hover, #btnAccount:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+#btnNewStudent:active, #btnNotifications:active, #btnSettings:active, #btnAccount:active {
+  transform: translateY(0);
+}
+
+/* Override previous compact notification style */
+#btnNotifications {
+  padding: 0 16px !important;
+  font-size: 14px !important;
+  border-radius: 12px !important;
+}
+
+/* Keep badge aligned in unified height */
+#btnNotifications .badge{
+  transform: translateY(-1px);
+}
+</style>
+<style>
+/* Group header and list visuals */
+.group-header { display:flex; align-items:center; gap:8px; }
+.group-wrap .group-list { display:block; }
+</style>
+<style>
+/* --- Group header UI: chevron + count badge --- */
+.group-header { display:flex; align-items:center; gap:10px; padding:2px 4px; }
+.group-header .title { font-weight:800; }
+.group-header .chev { transition: transform .18s ease, opacity .18s ease; display:inline-block; font-size:12px; opacity:.85; }
+.group-header.collapsed .chev { transform: rotate(-90deg); opacity:.6; }
+.count-badge { margin-left:auto; padding:2px 8px; border-radius:999px; font-size:12px; font-weight:700;
+  background: rgba(16,185,129,.16); color:#bdf7d3; border:1px solid rgba(16,185,129,.35); }
+</style>
+<style>
+/* === Haftalık Plan UI === */
+.plan-day details{ border:1px solid var(--border); border-radius:12px; background:#0b1220; margin-top:10px; }
+.plan-day summary{ cursor:pointer; padding:10px 12px; font-weight:800; list-style:none; }
+.plan-day .inner{ padding:10px 12px; display:grid; gap:8px; }
+.plan-row{ display:grid; grid-template-columns:120px 1fr 120px; gap:8px; }
+.plan-row input, .plan-row select{ width:100%; }
+.plan-actions{ display:flex; justify-content:flex-end; gap:8px; margin-top:12px; }
+.plan-hint{ color:var(--muted); font-size:12px; margin-top:6px }
+#weeklyPlanCard .day{ border:1px solid var(--border); border-radius:12px; padding:10px 12px; }
+#weeklyPlanCard .day-title{ font-weight:800; margin-bottom:6px; }
+#weeklyPlanCard .slot{ display:grid; grid-template-columns:120px 1fr 120px; gap:8px; padding:6px 0; border-bottom:1px dashed var(--border); }
+#weeklyPlanCard .slot:last-of-type{ border-bottom:none; }
+</style>
+<style>
+/* === Fix: Single-column detail view & no horizontal scroll === */
+html, body { max-width: 100%; overflow-x: hidden; }
+#detailView { overflow-x: hidden; }
+#detailView > .grid { grid-template-columns: 1fr !important; }
+#detailView .card { width: 100%; box-sizing: border-box; }
+#detailView .kv-container, #detailView .longbox, #detailView textarea, #detailView input { max-width: 100%; }
+#detailView .row { flex-wrap: wrap; }
+#detailView .v { overflow-wrap: anywhere; word-break: break-word; }
+</style>
+<style>
+/* alignment polish */
+#detailView { margin: 0; }
+#detailView > .grid { padding: 0; }
+#detailView .card { padding: 12px; }
+</style>
+<style>
+/* === Print / PDF styles for Weekly Plan (strong contrast) === */
+#printPlan { display:none; }
+@media print {
+  html, body { background:#fff !important; color:#000 !important; }
+  body * { visibility: hidden !important; color:#000 !important; }
+  #printPlan, #printPlan * { visibility: visible !important; color:#000 !important; }
+  #printPlan { display:block; position: absolute; inset: 0; padding: 18mm 16mm; font-size: 11pt; line-height: 1.35; }
+  #printPlan .title { font-weight: 800; font-size: 20pt; margin-bottom: 5mm; }
+  #printPlan .meta { font-size: 11pt; margin-bottom: 6mm; font-weight:600; }
+  #printPlan .day { border:1px solid #000; border-radius:4px; padding:4mm; margin-bottom:5mm; }
+  #printPlan .day-title { font-weight:800; margin-bottom:2mm; }
+  #printPlan .slot { display:grid; grid-template-columns: 32mm 1fr 32mm; gap: 3mm; border-bottom:1px dashed #000; padding: 2mm 0; }
+  #printPlan .slot:last-of-type { border-bottom:none; }
+  #printPlan .names { margin-top: 12mm; display:flex; gap: 10mm; }
+  #printPlan .names .col { flex: 1; }
+  #printPlan .names .label { font-weight:700; margin-bottom: 2mm; }
+  #printPlan .names .line { border-bottom: 1px solid #000; height: 8mm; }
+}
+</style>
+
+<style>
+/* --- PDF strong contrast base --- */
+@media print {
+  #printPlan { position: absolute; inset: 0; padding: 18mm 16mm; font-size: 11pt; line-height: 1.35; }
+  #printPlan .title { font-weight: 800; font-size: 20pt; margin-bottom: 5mm; }
+  #printPlan .meta { font-size: 11pt; margin-bottom: 6mm; font-weight:600; }
+  #printPlan .day { border:1px solid #000; border-radius:4px; padding:4mm; margin-bottom:5mm; }
+  #printPlan .day-title { font-weight:800; margin-bottom:2mm; }
+  #printPlan .slot { display:grid; grid-template-columns: 32mm 1fr 32mm; gap: 3mm; border-bottom:1px dotted #000; padding: 2mm 0; }
+  #printPlan .slot:last-of-type { border-bottom:none; }
+  #printPlan .names { margin-top: 10mm; display:flex; gap: 10mm; }
+  #printPlan .names .col { flex: 1; }
+  #printPlan .names .label { font-weight:700; margin-bottom: 2mm; }
+  #printPlan .names .line { border-bottom: 1px solid #000; height: 8mm; }
+  #printPlan .days { display:block; }
+}
+/* Two-column + tighter spacing to fit one page (portrait) */
+@page { size: A4; margin: 8mm; }
+@media print {
+  .two-col #printPlan { padding: 6mm; font-size: 9pt; line-height: 1.2; }
+  .two-col #printPlan .title { font-size: 14pt; margin-bottom: 3mm; }
+  .two-col #printPlan .meta { font-size: 9pt; margin-bottom: 3mm; }
+  .two-col #printPlan .days { display: grid; grid-template-columns: 1fr 1fr; gap: 3mm; }
+  .two-col #printPlan .day { margin-bottom: 0; padding: 2mm; }
+  .two-col #printPlan .day-title { margin-bottom: 1mm; }
+  .two-col #printPlan .slot { grid-template-columns: 22mm 1fr 22mm; gap: 2mm; padding: 1mm 0; }
+  .two-col #printPlan .names { margin-top: 6mm; gap: 6mm; }
+  .two-col #printPlan .names .line { height: 6mm; }
+}
+/* Landscape (wider width + 2 columns) */
+@media print {
+  .landscape #printPlan { padding: 8mm; font-size: 9.6pt; line-height: 1.25; }
+  .landscape #printPlan .title { font-size: 16pt; margin-bottom: 4mm; }
+  .landscape #printPlan .days { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; }
+  .landscape #printPlan .slot { grid-template-columns: 26mm 1fr 26mm; gap: 2mm; padding: 1mm 0; }
+}
+</style>
+
+
+<style>
+@media print {
+  .ultra #printPlan { padding: 5mm; font-size: 8pt; line-height: 1.15; }
+  .ultra #printPlan .title { font-size: 12pt; margin-bottom: 2mm; }
+  .ultra #printPlan .meta { font-size: 8pt; margin-bottom: 2mm; }
+  .ultra #printPlan .days { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2mm; }
+  .ultra #printPlan .day { margin-bottom: 0; padding: 1.6mm; border-radius: 2px; }
+  .ultra #printPlan .day-title { margin-bottom: 0.8mm; }
+  .ultra #printPlan .slot { grid-template-columns: 18mm 1fr 18mm; gap: 1.2mm; padding: 0.4mm 0; border-bottom: 1px dotted #000; }
+  .ultra #printPlan .slot:last-of-type { border-bottom: none; }
+  .ultra #printPlan .names { margin-top: 4mm; gap: 4mm; }
+  .ultra #printPlan .names .line { height: 5mm; }
+}
+</style>
+
+
+<style>
+@media print {
+  #printPlan { position: absolute; inset: 0; padding: 18mm 16mm; font-size: 11pt; line-height: 1.35; }
+  #printPlan .title { font-weight: 800; font-size: 20pt; margin-bottom: 5mm; }
+  #printPlan .meta { font-size: 11pt; margin-bottom: 6mm; font-weight:600; }
+  #printPlan .day { border:1px solid #000; border-radius:4px; padding:4mm; margin-bottom:5mm; }
+  #printPlan .day-title { font-weight:800; margin-bottom:2mm; }
+  #printPlan .slot { display:grid; grid-template-columns: 32mm 1fr 32mm; gap: 3mm; border-bottom:1px dotted #000; padding: 2mm 0; }
+  #printPlan .slot:last-of-type { border-bottom:none; }
+  #printPlan .names { margin-top: 10mm; display:flex; gap: 10mm; }
+  #printPlan .names .col { flex: 1; }
+  #printPlan .names .label { font-weight:700; margin-bottom: 2mm; }
+  #printPlan .names .line { border-bottom: 1px solid #000; height: 8mm; }
+  #printPlan .days { display:block; }
+  .two-col #printPlan { padding: 6mm; font-size: 9pt; line-height: 1.2; }
+  .two-col #printPlan .title { font-size: 14pt; margin-bottom: 3mm; }
+  .two-col #printPlan .meta { font-size: 9pt; margin-bottom: 3mm; }
+  .two-col #printPlan .days { display: grid; grid-template-columns: 1fr 1fr; gap: 3mm; }
+  .two-col #printPlan .day { margin-bottom: 0; padding: 2mm; }
+  .two-col #printPlan .day-title { margin-bottom: 1mm; }
+  .two-col #printPlan .slot { grid-template-columns: 22mm 1fr 22mm; gap: 2mm; padding: 1mm 0; }
+  .two-col #printPlan .names { margin-top: 6mm; gap: 6mm; }
+  .two-col #printPlan .names .line { height: 6mm; }
+  .landscape #printPlan { padding: 8mm; font-size: 9.6pt; line-height: 1.25; }
+  .landscape #printPlan .title { font-size: 16pt; margin-bottom: 4mm; }
+  .landscape #printPlan .days { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; }
+  .landscape #printPlan .slot { grid-template-columns: 26mm 1fr 26mm; gap: 2mm; padding: 1mm 0; }
+  .ultra #printPlan { padding: 5mm; font-size: 8pt; line-height: 1.15; }
+  .ultra #printPlan .title { font-size: 12pt; margin-bottom: 2mm; }
+  .ultra #printPlan .meta { font-size: 8pt; margin-bottom: 2mm; }
+  .ultra #printPlan .days { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2mm; }
+  .ultra #printPlan .day { margin-bottom: 0; padding: 1.6mm; border-radius: 2px; }
+  .ultra #printPlan .day-title { margin-bottom: 0.8mm; }
+  .ultra #printPlan .slot { grid-template-columns: 18mm 1fr 18mm; gap: 1.2mm; padding: 0.4mm 0; border-bottom: 1px dotted #000; }
+  .ultra #printPlan .slot:last-of-type { border-bottom: none; }
+  .ultra #printPlan .names { margin-top: 4mm; gap: 4mm; }
+  .ultra #printPlan .names .line { height: 5mm; }
+}
+</style>
+
+</head>
+<body>
+<header>
+<div class="wrap row-between">
+<h1><a href="#" id="btnHome" style="text-decoration:none; cursor:pointer;; color: inherit; text-decoration:none; cursor:pointer;">Rehberlik Sistemi</a></h1>
+<!-- Giriş yokken gizlenecek bar -->
+<div class="row" id="authedBar" style="display:none">
+<input id="search" placeholder="Ara: ad / alan" style="width:260px"/>
+<label class="row muted" style="gap:6px">
+<input id="showArchived" type="checkbox"/>
+          Arşivdekileri göster
+        </label>
+<button class="btn-primary" id="btnNewStudent">+ Yeni Öğrenci</button>
+<button class="btn btn-sm" id="btnNotifications">🔔 Bildirimler<span class="badge" id="notifBadge">0</span></button><button class="btn" id="btnSettings">⚙️ Ayarlar</button><button class="btn" id="btnWeeklyPlan">📅 Haftalık Plan</button><div class="account-wrap"><button class="btn account-btn" id="btnAccount" type="button"><span class="account-avatar"></span> Hesabım ▾</button><div class="dropdown hidden" id="accountDropdown"><button class="item" data-action="profile" type="button">Hesap Bilgilerim</button><button class="item" data-action="about" type="button">Hakkında</button><div class="divider"></div><div class="section-title">Yardım</div><button class="item" data-action="guide" type="button">Kullanım kılavuzu</button><button class="item" data-action="contact" type="button">Bize ulaşın</button><div class="divider"></div><button class="item" data-action="logout" type="button">Çıkış</button></div></div>
+</div>
+</div>
+</header>
+<!-- GİRİŞ EKRANI -->
+<section class="wrap" id="authView" style="padding:18px 16px">
+<div class="card" style="max-width:420px;margin:24px auto;display:grid;gap:10px">
+<h2 style="margin:0">Giriş Yap</h2>
+<input autocomplete="username" id="loginEmail" placeholder="E-posta" type="email"/>
+<input autocomplete="current-password" id="loginPass" placeholder="Şifre" type="password"/>
+<button class="btn-primary" id="btnLogin">Giriş</button>
+<div class="row" style="justify-content:space-between">
+<button class="btn" id="btnToggleRegister" type="button">Hesap oluştur</button>
+<button class="btn" id="btnReset" type="button">Şifremi unuttum</button>
+</div>
+<div class="muted" id="authMsg"></div>
+</div>
+<div class="card" id="registerBox" style="max-width:420px;margin:0 auto;display:none;gap:10px">
+<h3 style="margin:0">Hesap Oluştur</h3>
+<input autocomplete="username" id="regEmail" placeholder="E-posta" type="email"/>
+<input autocomplete="new-password" id="regPass" placeholder="Şifre (min 6 karakter)" type="password"/>
+<button class="btn-primary" id="btnRegister">Kaydol</button>
+<div class="muted" id="regMsg" style="margin-top:6px">Kayıt olduktan sonra yönetici onayı gerekir.</div>
+</div>
+</section>
+<main class="wrap hidden" style="padding-top:14px">
+<div id="msg"></div>
+<!-- LİSTE GÖRÜNÜMÜ -->
+<section class="grid" id="listView">
+<div class="card row-between" style="align-items:center;justify-content:space-between;gap:12px">
+<div class="muted">Öğrenciler</div>
+<select class="btn" id="sortBy" style="width:180px">
+<option value="lastNoteAt:desc">Son Görüşme ↓</option>
+<option value="lastNoteAt:asc">Son Görüşme ↑</option>
+<option value="name:asc">Ad Soyad A→Z</option>
+<option value="name:desc">Ad Soyad Z→A</option>
+</select>
+</div>
+<div class="card">
+<div id="students" style="display:grid;gap:8px"></div>
+</div>
+</section>
+<!-- DETAY GÖRÜNÜMÜ -->
+<section class="grid hidden" id="detailView">
+<div class="row-between">
+<div class="row" style="gap:8px">
+<button class="btn" id="btnBack">← Ana Liste</button>
+<span class="muted" id="dArchivedBadge" style="display:none">• Arşivde</span>
+</div>
+<div class="row gap-6">
+<button class="btn" id="btnEdit">Düzenle</button>
+<button class="btn" id="btnArchive">Arşive Gönder</button>
+<button class="btn btn-danger" id="btnDelete">Sil</button>
+</div>
+</div>
+<div class="muted" id="dLastNoteLabel" style="margin:6px 0 0 0">Son Görüşme: —</div>
+<div class="grid">
+<div class="card">
+<div class="row-between">
+<div>
+<div id="dName" style="font-weight:800;font-size:20px"></div>
+<div class="muted" id="dTrack"></div>
+</div>
+<div class="row" style="gap:8px;flex-wrap:wrap"><a class="btn-tone1 btn" href="#" id="btnCallStudent">Öğrenciyi Ara</a><a class="btn-tone2 btn" href="#" id="btnCallMother">Anneyi Ara</a><a class="btn-tone3 btn" href="#" id="btnCallFather">Babayı Ara</a></div></div>
+<div style="margin-top:12px;display:grid;gap:8px">
+<div class="kv-container">
+<div class="kv-row"><div class="k">Telefon</div><div class="v" id="dPhone"></div></div>
+<div class="kv-row"><div class="k">Anne</div><div class="v" id="dMother"></div></div>
+<div class="kv-row"><div class="k">Anne Tel</div><div class="v" id="dMotherPhone"></div></div>
+<div class="kv-row"><div class="k">Baba</div><div class="v" id="dFather"></div></div>
+<div class="kv-row"><div class="k">Baba Tel</div><div class="v" id="dFatherPhone"></div></div>
+<div class="kv-row"><div class="k">Yakın Adı</div><div class="v" id="dRelative"></div></div>
+<div class="kv-row"><div class="k">Yakın Tel</div><div class="v" id="dRelativePhone"></div></div>
+<div class="kv-row"><div class="k">Doğum Tarihi</div><div class="v" id="dBirth"></div></div>
+<div class="kv-row"><div class="k">Mezuniyet</div><div class="v" id="dGrad"></div></div>
+<div class="kv-row"><div class="k">Hedef Üni / Bölüm</div><div class="v" id="dTargets"></div></div>
+</div>
+</div>
+<div class="longbox"><div class="title">Genel Görüş</div><div class="body" id="dSummary" style="white-space:pre-wrap"></div></div>
+<div class="longbox"><div class="title">Kullandığı Kaynaklar</div><div class="body" id="dResources" style="white-space:pre-wrap"></div></div>
+</div>
+<div class="card">
+<div style="font-weight:700;margin-bottom:8px">Yeni Görüşme</div>
+<textarea id="noteText" placeholder="Görüşme notunu yaz..."></textarea>
+<label class="muted" style="display:block;margin-top:8px">Tarih &amp; Saat (isteğe bağlı)</label>
+<input id="noteWhen" type="datetime-local"/>
+<label class="row muted" style="margin-top:8px;gap:6px"><input type="checkbox" id="noteIsParent"/> Bu bir veli görüşmesi</label>
+<button class="btn-primary" id="btnAddNote" style="margin-top:8px">Görüşme Ekle</button>
+</div>
+</div>
+<div class="card">
+<div style="font-weight:700;margin-bottom:8px">Görüşme Geçmişi</div>
+<div id="notes" style="display:grid;gap:8px"></div>
+</div>
+</section>
+</main>
+<!-- ÖĞRENCİ MODAL -->
+<dialog id="studentModal">
+<form method="dialog" style="padding:16px;max-width:640px">
+<h3 style="margin:6px 0 12px 0">Öğrenci</h3>
+<div class="grid" style="gap:10px">
+<input id="mName" placeholder="Ad Soyad *" required=""/>
+<label class="muted">Sınıf / Alan</label>
+<select id="mTrack">
+<option value="SAY1">SAY1</option>
+<option value="SAY 2">SAY 2</option>
+<option value="EA">EA</option>
+</select>
+<input id="mPhone" placeholder="Telefon"/>
+<input id="mMother" placeholder="Anne adı"/>
+<input id="mMotherPhone" placeholder="Anne Tel"/>
+<input id="mFather" placeholder="Baba adı"/>
+<input id="mFatherPhone" placeholder="Baba Tel"/>
+<input id="mRelative" placeholder="Yakın adı"/>
+<input id="mRelativePhone" placeholder="Yakın Tel"/>
+<label class="muted">Doğum tarihi</label>
+<input id="mBirth" type="date"/>
+<input id="mUni" placeholder="Hedef üniversite"/>
+<input id="mDept" placeholder="Hedef bölüm"/>
+<select id="mGrad">
+<option value="">Mezuniyet durumu (seçiniz)</option>
+<option value="Öğrenci">Öğrenci</option>
+<option value="Mezun">Mezun</option>
+<option value="Ara veriyor">Ara veriyor</option>
+</select>
+<textarea id="mSummary" placeholder="Öğrenci hakkında genel görüş (uzun)"></textarea>
+<textarea id="mResources" placeholder="Kullandığı kaynaklar (uzun)"></textarea>
+</div>
+<div class="row" style="justify-content:flex-end;margin-top:14px">
+<button class="btn" id="modalCancel" type="button">İptal</button>
+<button class="btn-primary" id="modalSave" value="save">Kaydet</button>
+</div>
+</form>
+</dialog>
+<!-- NOT DÜZENLEME MODALI -->
+<dialog id="noteModal">
+<form method="dialog" style="padding:20px;max-width:800px;width:clamp(520px,80vw,800px)">
+<h3 style="margin:6px 0 12px 0">Görüşmeyi Düzenle</h3>
+<div class="grid" style="gap:10px">
+<textarea id="nText" placeholder="Görüşme notu" style="min-height:160px"></textarea>
+<label class="muted">Tarih &amp; Saat</label>
+<input id="nWhen" type="datetime-local"/>
+<label class="row muted" style="align-items:center;gap:6px"><input type="checkbox" id="nIsParent"/> Bu bir veli görüşmesi</label>
+</div>
+<div class="row" style="justify-content:flex-end;margin-top:14px">
+<button class="btn" id="nCancel" type="button">İptal</button>
+<button class="btn-primary" id="nSave" value="save">Kaydet</button>
+</div>
+</form>
+</dialog>
+<!-- AYARLAR (TEMA) MODALI -->
+<dialog id="settingsModal">
+<form method="dialog" style="padding:16px;max-width:520px">
+<h3 style="margin:6px 0 12px 0">Tema Ayarları</h3>
+<div class="grid" style="gap:10px;grid-template-columns:1fr 1fr">
+<label>Arka Plan<input id="cBg" type="color"/></label>
+<label>Kart<input id="cCard" type="color"/></label>
+<label>Vurgu (Accent)<input id="cAccent" type="color"/></label>
+<label>Uyarı (Danger)<input id="cDanger" type="color"/></label>
+<label>Sınır (Border)<input id="cBorder" type="color"/></label>
+</div>
+<div class="row" style="justify-content:flex-end;margin-top:14px;gap:8px">
+<button class="btn" id="btnThemeReset" type="button">Varsayılan</button>
+<button class="btn-primary" id="btnThemeSave">Kaydet</button>
+</div>
+</form>
+</dialog>
+<!-- Firebase compat -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js">
+      function updateCallButtons(){
+        const s = CURRENT || {};
+        const studentTel = (s.phone || '').replace(/\s+/g,'');
+        const motherTel  = (s.motherPhone || '').replace(/\s+/g,'');
+        const fatherTel  = (s.fatherPhone || '').replace(/\s+/g,'');
+        const relativeTel= (s.relativePhone || '').replace(/\s+/g,'');
+
+        const callStudent = document.getElementById('btnCallStudent');
+        const callMother  = document.getElementById('btnCallMother');
+        const callFather  = document.getElementById('btnCallFather');
+
+        if (callStudent) callStudent.href = studentTel ? `tel:${studentTel}` : '#';
+        if (callMother)  callMother.href  = motherTel  ? `tel:${motherTel}`   : (relativeTel ? `tel:${relativeTel}` : '#');
+
+        // Father call button: if father phone yoksa ve yakın telefon varsa yakına bağlan
+        if (callFather){
+          if (fatherTel) callFather.href = `tel:${fatherTel}`;
+          else if (relativeTel) callFather.href = `tel:${relativeTel}`;
+          else callFather.href = '#';
+        }
+      }
+
+</script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js">
+      function updateCallButtons(){
+        const s = CURRENT || {};
+        const studentTel = (s.phone || '').replace(/\s+/g,'');
+        const motherTel  = (s.motherPhone || '').replace(/\s+/g,'');
+        const fatherTel  = (s.fatherPhone || '').replace(/\s+/g,'');
+        const relativeTel= (s.relativePhone || '').replace(/\s+/g,'');
+
+        const callStudent = document.getElementById('btnCallStudent');
+        const callMother  = document.getElementById('btnCallMother');
+        const callFather  = document.getElementById('btnCallFather');
+
+        if (callStudent) callStudent.href = studentTel ? `tel:${studentTel}` : '#';
+        if (callMother)  callMother.href  = motherTel  ? `tel:${motherTel}`   : (relativeTel ? `tel:${relativeTel}` : '#');
+
+        // Father call button: if father phone yoksa ve yakın telefon varsa yakına bağlan
+        if (callFather){
+          if (fatherTel) callFather.href = `tel:${fatherTel}`;
+          else if (relativeTel) callFather.href = `tel:${relativeTel}`;
+          else callFather.href = '#';
+        }
+      }
+
+</script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js">
+      function updateCallButtons(){
+        const s = CURRENT || {};
+        const studentTel = (s.phone || '').replace(/\s+/g,'');
+        const motherTel  = (s.motherPhone || '').replace(/\s+/g,'');
+        const fatherTel  = (s.fatherPhone || '').replace(/\s+/g,'');
+        const relativeTel= (s.relativePhone || '').replace(/\s+/g,'');
+
+        const callStudent = document.getElementById('btnCallStudent');
+        const callMother  = document.getElementById('btnCallMother');
+        const callFather  = document.getElementById('btnCallFather');
+
+        if (callStudent) callStudent.href = studentTel ? `tel:${studentTel}` : '#';
+        if (callMother)  callMother.href  = motherTel  ? `tel:${motherTel}`   : (relativeTel ? `tel:${relativeTel}` : '#');
+
+        // Father call button: if father phone yoksa ve yakın telefon varsa yakına bağlan
+        if (callFather){
+          if (fatherTel) callFather.href = `tel:${fatherTel}`;
+          else if (relativeTel) callFather.href = `tel:${relativeTel}`;
+          else callFather.href = '#';
+        }
+      }
+
+</script>
+<script>
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyBl_SRAk4j9jJqEwe9RCvmI_iXqal1Z-vI",
+      authDomain: "rehberlik-sistemi.firebaseapp.com",
+      projectId: "rehberlik-sistemi",
+      storageBucket: "rehberlik-sistemi.firebasestorage.app",
+      messagingSenderId: "376612659167",
+      appId: "1:376612659167:web:fbe6a82ff6997cd0642e6a"
+    };
+
+    const app = firebase.initializeApp(firebaseConfig);
+    const db  = firebase.firestore();
+    const auth = firebase.auth();
+
+    const $ = s => document.querySelector(s);
+    const msg = $('#msg');
+    const listView = $('#listView');
+    const detailView = $('#detailView');
+    const listEl = $('#students');
+    const notesEl = $('#notes');
+    const modal = $('#studentModal');
+    const noteModal = $('#noteModal');
+    const settingsModal = $('#settingsModal');
+    const sortSel = $('#sortBy');
+    const search = $('#search');
+    const showArchived = $('#showArchived');
+    const authedBar = document.getElementById('authedBar');
+
+    // Auth UI
+    const authView = document.getElementById('authView');
+    const mainEl = document.querySelector('main');
+    const btnLogout = document.getElementById('btnLogout');
+    const authMsg = document.getElementById('authMsg');
+    const regMsg  = document.getElementById('regMsg');
+
+    let SORT = 'lastNoteAt:desc';
+    let CURRENT_ID = null;
+    let CURRENT = null;
+
+    // Yardımcılar
+    let EDIT_MODE = false;
+    let CURRENT_NOTE_ID = null;
+    let NOTES_CACHE = new Map();
+
+    const toDateInput = ts =>
+      (ts && ts.toDate)
+        ? new Date(ts.toDate().getTime() - new Date().getTimezoneOffset()*60000).toISOString().slice(0,10)
+        : '';
+    const toDTLocal = d => new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,16);
+
+    function toast(html, kind='ok'){
+      msg.innerHTML = `<div class="${kind}">${html}</div>`;
+      setTimeout(()=> msg.innerHTML = '', 3500);
+    }
+    function fmtDate(ts){
+      if (!ts) return '—';
+      const d = ts.toDate ? ts.toDate() : new Date(ts);
+      return d.toLocaleString('tr-TR',{dateStyle:'medium', timeStyle:'short'});
+    }
+
+    function groupComparator() {
+      const [field, dir] = (SORT || 'lastNoteAt:desc').split(':');
+      const isDesc = (dir === 'desc');
+      if (field === 'name') {
+        return (a,b)=>{
+          const va = (a.name||'').toLocaleLowerCase('tr-TR');
+          const vb = (b.name||'').toLocaleLowerCase('tr-TR');
+          const cmp = va.localeCompare(vb, 'tr-TR');
+          return isDesc ? -cmp : cmp;
+        };
+      }
+      return (a,b)=>{
+        const ta = a.lastNoteAt?.toDate ? a.lastNoteAt.toDate().getTime() : 0;
+        const tb = b.lastNoteAt?.toDate ? b.lastNoteAt.toDate().getTime() : 0;
+        if (ta === tb) return 0;
+        const cmp = ta < tb ? -1 : 1;
+        return isDesc ? -cmp : cmp;
+      };
+    }
+
+    // ===== Tema (localStorage) =====
+    const THEME_KEYS = ['--bg','--card','--accent','--danger','--border'];
+    const DEFAULT_THEME = {
+      '--bg':'#0f172a','--card':'#111827','--accent':'#10b981','--danger':'#ef4444','--border':'#1f2937'
+    };
+    function applyTheme(obj){
+      const root = document.documentElement;
+      THEME_KEYS.forEach(k=>{
+        if (obj[k]) root.style.setProperty(k, obj[k]);
+      });
+      // inputları güncelle
+      $('#cBg').value = toHex(getComputedStyle(document.documentElement).getPropertyValue('--bg'));
+      $('#cCard').value = toHex(getComputedStyle(document.documentElement).getPropertyValue('--card'));
+      $('#cAccent').value = toHex(getComputedStyle(document.documentElement).getPropertyValue('--accent'));
+      $('#cDanger').value = toHex(getComputedStyle(document.documentElement).getPropertyValue('--danger'));
+      $('#cBorder').value = toHex(getComputedStyle(document.documentElement).getPropertyValue('--border'));
+    }
+    function toHex(c){
+      // rgb/hex karışık gelebilir; normalize et
+      const s = c.trim();
+      if (s.startsWith('#')) return s;
+      const m = s.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
+      if (!m) return '#000000';
+      const [r,g,b] = [m[1],m[2],m[3]].map(n=>parseInt(n).toString(16).padStart(2,'0'));
+      return `#${r}${g}${b}`;
+    }
+    function loadTheme(){
+      try{
+        const raw = localStorage.getItem('rehberlik_theme');
+        const obj = raw ? JSON.parse(raw) : DEFAULT_THEME;
+        applyTheme(obj);
+      }catch(_){ applyTheme(DEFAULT_THEME); }
+    }
+    function saveTheme(){
+      const obj = {
+        '--bg': $('#cBg').value,
+        '--card': $('#cCard').value,
+        '--accent': $('#cAccent').value,
+        '--danger': $('#cDanger').value,
+        '--border': $('#cBorder').value,
+      };
+      localStorage.setItem('rehberlik_theme', JSON.stringify(obj));
+      applyTheme(obj);
+      toast('Tema kaydedildi ✅');
+      settingsModal.close();
+    }
+
+    // ===== Auth görünürlük =====
+    function showAuth(message=''){
+      if (message) authMsg.textContent = message;
+      authView.style.display = '';
+      mainEl.classList.add('hidden');
+      if (btnLogout) btnLogout.style.display = 'none';
+      if (authedBar) authedBar.style.display = 'none';
+    }
+    function showApp(){
+      authView.style.display = 'none';
+      mainEl.classList.remove('hidden');
+      if (btnLogout) btnLogout.style.display = '';
+      if (authedBar) authedBar.style.display = 'flex';
+    }
+
+    // ===== Giriş / Kayıt / Şifre Sıfırlama / Çıkış =====
+    // Kalıcı oturum garantisi
+    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(()=>{});
+
+    document.getElementById('btnLogin').addEventListener('click', async ()=>{
+      const email = (document.getElementById('loginEmail').value || '').trim();
+      const pass  = (document.getElementById('loginPass').value  || '').trim();
+      try{
+        await auth.signInWithEmailAndPassword(email, pass);
+        authMsg.textContent = '';
+      }catch(e){
+        authMsg.textContent = 'Giriş başarısız: ' + (e.message || e);
+      }
+    });
+
+    document.getElementById('btnToggleRegister').addEventListener('click', ()=>{
+      const box = document.getElementById('registerBox');
+      box.style.display = (box.style.display === 'none' || box.style.display === '') ? 'grid' : 'none';
+    });
+
+    document.getElementById('btnRegister').addEventListener('click', async ()=>{
+      const email = (document.getElementById('regEmail').value || '').trim();
+      const pass  = (document.getElementById('regPass').value  || '').trim();
+      try{
+        const cred = await auth.createUserWithEmailAndPassword(email, pass);
+        const uid = cred.user.uid;
+        await db.collection('users').doc(uid).set({
+          email, approved: false,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        await auth.signOut();
+        showAuth('Kayıt alındı. Yönetici onayı sonrası giriş yapabilirsiniz.');
+        document.getElementById('registerBox').style.display = 'none';
+      }catch(e){
+        regMsg.textContent = 'Kayıt hatası: ' + (e.message || e);
+      }
+    });
+
+    document.getElementById('btnReset').addEventListener('click', async ()=>{
+      const email = (document.getElementById('loginEmail').value || '').trim();
+      if (!email){ authMsg.textContent = 'Önce e-posta yazın.'; return; }
+      try{
+        await auth.sendPasswordResetEmail(email);
+        authMsg.textContent = 'Şifre sıfırlama e-postası gönderildi.';
+      }catch(e){
+        authMsg.textContent = 'Gönderilemedi: ' + (e.message || e);
+      }
+    });
+
+    if (btnLogout) btnLogout.addEventListener('click', async ()=>{
+      await auth.signOut();
+      showAuth('Çıkış yapıldı.');
+    });
+
+    // Approved kontrolü
+    auth.onAuthStateChanged(async (user)=>{
+      if (!user){ showAuth(); return; }
+      try{
+        const ud = await db.collection('users').doc(user.uid).get();
+        const approved = ud.exists && ud.data()?.approved === true;
+
+        if (!approved){
+          await auth.signOut();
+          showAuth('Hesabınız yönetici onayında. Onaylanınca giriş yapabilirsiniz.');
+          return;
+        }
+        showApp();
+        if (typeof boot === 'function') boot();
+
+      }catch(e){
+        await auth.signOut();
+        showAuth('Giriş engellendi (onay bulunamadı).');
+      }
+    });
+
+    // ========= UYGULAMA =========
+    function boot(){
+      async function recomputeLastNote(studentId){
+        const snap = await db.collection('notes')
+          .where('studentId','==',studentId)
+          .where('ownerUid','==',auth.currentUser.uid)
+          .get();
+        let maxTs = null;
+        snap.forEach(doc=>{
+          const v = doc.data();
+          // Veli görüşmelerini son görüşme hesabına dahil etme
+          if (v.isParentMeeting === true) return;
+          const t = v.createdAt && v.createdAt.toDate ? v.createdAt.toDate() : null;
+          if (t && (!maxTs || t.getTime() > maxTs.getTime())) maxTs = t;
+        });
+        await db.collection('students').doc(studentId).update({ lastNoteAt: maxTs || null });
+      }
+
+      async function loadStudents(){
+        try{
+          const snap = await db.collection('students')
+          .where('ownerUid','==',auth.currentUser.uid)
+          .get();
+          const term = (search?.value || '').toLowerCase();
+
+          const groups = { 'SAY1': [], 'SAY 2': [], 'EA': [], 'Diğer': [] };
+          const visibleAll = [];
+
+          snap.forEach(d => {
+            const s = d.data();
+            if (s.archived && !showArchived?.checked) return;
+
+            const haystack = ((s.name || '') + ' ' + (s.targetDepartment || '')).toLowerCase();
+            if (term && !haystack.includes(term)) return;
+
+            const item = { id: d.id, ...s };
+            const key = (s.track === 'SAY1' || s.track === 'SAY 2' || s.track === 'EA') ? s.track : 'Diğer';
+            groups[key].push(item);
+            visibleAll.push(item);
+          });
+
+          const byRecency = [...visibleAll].sort((a,b)=>{
+            const ta = a.lastNoteAt?.toDate ? a.lastNoteAt.toDate().getTime() : 0;
+            const tb = b.lastNoteAt?.toDate ? b.lastNoteAt.toDate().getTime() : 0;
+            return tb - ta;
+          });
+          const n = byRecency.length;
+          const greenCount = Math.floor(n/2);
+          const greenSet = new Set(byRecency.slice(0, greenCount).map(s=>s.id));
+
+          listEl.innerHTML = '';
+          const groupOrder = ['SAY1', 'SAY 2', 'EA', 'Diğer'];
+          let printed = false;
+
+          for (const g of groupOrder){
+            const arr = groups[g];
+            if (!arr.length) continue;
+            printed = true;
+
+            // Group wrapper and header with count
+            const groupWrap = document.createElement('div');
+            groupWrap.className = 'group-wrap';
+            const groupList = document.createElement('div');
+            groupList.className = 'group-list';
+            const h = document.createElement('div');
+            h.className = 'muted group-header';
+            h.style.cssText = 'margin:12px 4px 6px; font-weight:700; cursor:pointer; user-select:none;';
+            h.innerHTML = '<span class="chev">▼</span><span class="title">' + g + '</span><span class="count-badge">' + arr.length + ' öğrenci</span>';
+            groupWrap.appendChild(h);
+            groupWrap.appendChild(groupList);
+            listEl.appendChild(groupWrap);
+
+            // Toggle collapse/expand
+            h.addEventListener('click', ()=>{
+              const isHidden = groupList.style.display === 'none';
+              groupList.style.display = isHidden ? '' : 'none';
+              h.classList.toggle('collapsed', !isHidden);
+            });
+
+            arr.sort(groupComparator());
+
+            arr.forEach(s=>{
+              const isGreen = greenSet.has(s.id);
+              const colorCls = isGreen ? 'green' : 'red';
+
+              const el = document.createElement('div');
+              el.className = 'item';
+              el.style.opacity = s.archived ? '0.6' : '1';
+              const badge = s.archived ? `<span class="muted" style="font-size:11px;margin-left:6px">• Arşiv</span>` : '';
+              el.innerHTML = `
+                <div>
+                  <div class="name-pill ${colorCls}">${s.name || ''}${badge}</div>
+                  <div class="muted" style="font-size:12px">${s.targetDepartment || '—'}</div>
+                </div>
+                <div style="text-align:right">
+                  <div class="muted" style="font-size:12px">Son Görüşme</div>
+                  <div>${s.lastNoteAt ? fmtDate(s.lastNoteAt) : '—'}</div>
+                </div>
+              `;
+              el.addEventListener('click', ()=> openDetail(s.id, s));
+              groupList.appendChild(el);
+            });
+          }
+
+          if (!printed){
+            listEl.innerHTML = '<div class="muted">Kayıt yok</div>';
+          }
+        }catch(e){
+          console.error(e);
+          toast('Liste yüklenemedi: ' + e.message, 'error');
+        }
+      }
+
+      function openDetail(id, s){
+        CURRENT_ID = id;
+        CURRENT = s;
+
+        $('#dName').textContent = s.name || '';
+        $('#dTrack').textContent = s.track || '';
+        $('#dPhone').textContent = s.phone || '';
+        $('#dMother').textContent = s.motherName || '';
+        $('#dMotherPhone').textContent = s.motherPhone || '';
+        $('#dFather').textContent = s.fatherName || '';
+        $('#dFatherPhone').textContent = s.fatherPhone || '';
+        $('#dRelative').textContent = s.relativeName || '';
+        $('#dRelativePhone').textContent = s.relativePhone || '';
+        $('#dBirth').textContent  = s.birthDate && s.birthDate.toDate ? s.birthDate.toDate().toLocaleDateString('tr-TR') : '—';
+        $('#dGrad').textContent   = s.graduationStatus || '—';
+        $('#dTargets').textContent= [s.targetUniversity, s.targetDepartment].filter(Boolean).join(' / ') || '—';
+        $('#dSummary').textContent= s.summary || '—';
+        $('#dResources').textContent = s.resources || '—';
+        $('#dLastNoteLabel').textContent = 'Son Görüşme: ' + (s.lastNoteAt ? fmtDate(s.lastNoteAt) : '—');
+
+        const isArchived = !!s.archived;
+        $('#dArchivedBadge').style.display = isArchived ? 'inline' : 'none';
+        $('#btnArchive').textContent = isArchived ? 'Arşivden Çıkar' : 'Arşive Gönder';
+
+        const dt = document.getElementById('noteWhen');
+        if (dt) dt.value = toDTLocal(new Date());
+
+        loadNotes();
+        // Call buttons update
+        updateCallButtons();
+
+
+        listView.classList.add('hidden');
+        detailView.classList.remove('hidden');
+        window.scrollTo(0,0);
+      
+    // === Haftalık Plan kartını ekle ve doldur ===
+    (function(){
+      if (!document.getElementById('weeklyPlanCard')){
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.id = 'weeklyPlanCard';
+        card.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div style="font-weight:700">Haftalık Plan</div><div style="display:flex;gap:6px"><button class="btn" id="btnPlanPdfDetail" type="button">📄 PDF</button><button class="btn" id="btnPlanPdfDetailTwoCol" type="button">📄 PDF 2 Sütun (Dikey)</button><button class="btn" id="btnPlanPdfDetailLandscape" type="button">📄 PDF Yatay</button><button class="btn" id="btnPlanPdfDetailUltra" type="button">📄 PDF Ultra (3 sütun)</button></div></div><div id="weeklyPlanRender" style="display:grid; gap:8px; grid-template-columns:repeat(2,minmax(0,1fr))"></div>';
+        document.getElementById('detailView').appendChild(card);
+      } else {
+        // temizle
+        document.getElementById('weeklyPlanRender').innerHTML = '';
+      }
+      if (window.loadWeeklyPlanForStudent){
+        window.loadWeeklyPlanForStudent(id);
+      }
+    })();
+}
+
+      async function loadNotes(){
+        notesEl.innerHTML = '<div class="muted">Yükleniyor…</div>';
+        NOTES_CACHE.clear();
+        try{
+          const snap = await db.collection('notes')
+            .where('studentId','==',CURRENT_ID)
+            .where('ownerUid','==',auth.currentUser.uid)
+            .get();
+
+          const rows = snap.docs
+            .map(n => ({ id: n.id, ...n.data() }))
+            .sort((a,b) => {
+              const ta = a.createdAt && a.createdAt.toDate ? a.createdAt.toDate().getTime() : 0;
+              const tb = b.createdAt && b.createdAt.toDate ? b.createdAt.toDate().getTime() : 0;
+              return tb - ta;
+            });
+
+          rows.forEach(r=> NOTES_CACHE.set(r.id, r));
+
+          const list = document.getElementById('notes');
+          if (!rows.length){
+            list.innerHTML = '<div class="muted">Henüz görüşme yok</div>';
+            return;
+          }
+
+          list.innerHTML = rows.map(v => {
+            const whenTxt = v.createdAt && v.createdAt.toDate
+              ? v.createdAt.toDate().toLocaleString('tr-TR',{dateStyle:'medium',timeStyle:'short'})
+              : '—';
+            const parentBadge = v.isParentMeeting === true
+              ? '<div class="muted" style="font-size:11px;margin-bottom:4px">👨‍👩‍👧 Veli görüşmesi</div>'
+              : '';
+            return `
+              <div class="item" data-note-id="${v.id}">
+                <div style="white-space:pre-wrap">${parentBadge}${v.text || ''}</div>
+                <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px; min-width:210px">
+                  <div class="muted" style="text-align:right">${whenTxt}</div>
+                  <div class="row" style="gap:6px">
+                    <button class="btn" data-action="edit" data-id="${v.id}">Düzenle</button>
+                    <button class="btn-sm btn-danger" data-action="delete" data-id="${v.id}">Sil</button>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }catch(e){
+          console.error(e);
+          notesEl.innerHTML = '<div class="error">Notlar yüklenemedi: '+e.message+'</div>';
+        }
+      }
+
+      async function addNote(){
+        const text = ($('#noteText').value || '').trim();
+        const whenStr = ($('#noteWhen').value || '').trim();
+        const isParent = document.getElementById('noteIsParent') ? document.getElementById('noteIsParent').checked : false;
+        if (!text){ toast('Not boş olamaz','error'); return; }
+
+        const createdAt = whenStr
+          ? new Date(whenStr)
+          : firebase.firestore.FieldValue.serverTimestamp();
+
+        try{
+          await db.collection('notes').add({
+            studentId: CURRENT_ID,
+            text,
+            createdAt,
+            ownerUid: auth.currentUser.uid,
+            isParentMeeting: isParent
+          });
+
+          // Veli görüşmeleri son görüşme tarihini değiştirmesin
+          if (!isParent){
+            await db.collection('students').doc(CURRENT_ID).update({ lastNoteAt: createdAt });
+          }
+
+          $('#noteText').value = '';
+          const dt = document.getElementById('noteWhen');
+          if (dt) dt.value = toDTLocal(new Date());
+          const ch = document.getElementById('noteIsParent');
+          if (ch) ch.checked = false;
+
+          toast('Görüşme kaydedildi ✅');
+          await loadNotes();
+          await loadStudents();
+        }catch(e){
+          console.error(e);
+          toast('Kaydedilemedi: ' + e.message, 'error');
+        }
+      }
+
+      notesEl.addEventListener('click', async (e)=>{
+        const btn = e.target.closest('button[data-action]');
+        if (!btn) return;
+        const action = btn.getAttribute('data-action');
+        const id = btn.getAttribute('data-id');
+        const note = NOTES_CACHE.get(id);
+        if (!note) return;
+
+        if (action === 'edit'){
+          CURRENT_NOTE_ID = id;
+          $('#nText').value = note.text || '';
+          const dt = note.createdAt && note.createdAt.toDate ? note.createdAt.toDate() : new Date();
+          $('#nWhen').value = toDTLocal(dt);
+          const ch = document.getElementById('nIsParent');
+          if (ch) ch.checked = !!note.isParentMeeting;
+          noteModal.showModal();
+        }
+
+        if (action === 'delete'){
+          if (!confirm('Bu görüşme kaydını silmek istediğinizden emin misiniz?')) return;
+          try{
+            await db.collection('notes').doc(id).delete();
+            await recomputeLastNote(CURRENT_ID);
+            toast('Görüşme silindi ✅');
+            await loadNotes();
+            await loadStudents();
+          }catch(err){
+            console.error(err);
+            toast('Silinemedi: ' + err.message, 'error');
+          }
+        }
+      });
+
+      document.getElementById('nSave').addEventListener('click', async (e)=>{
+        e.preventDefault();
+        if (!CURRENT_NOTE_ID) { noteModal.close(); return; }
+        const text = ($('#nText').value || '').trim();
+        const whenStr = ($('#nWhen').value || '').trim();
+        const isParent = document.getElementById('nIsParent') ? document.getElementById('nIsParent').checked : false;
+        if (!text){ toast('Not boş olamaz','error'); return; }
+        if (!whenStr){ toast('Tarih & Saat seçin','error'); return; }
+
+        const newDate = new Date(whenStr);
+        try{
+          await db.collection('notes').doc(CURRENT_NOTE_ID).update({ text, createdAt: newDate, isParentMeeting: isParent });
+          await recomputeLastNote(CURRENT_ID);
+          noteModal.close();
+          CURRENT_NOTE_ID = null;
+          toast('Görüşme güncellendi ✅');
+          await loadNotes();
+          await loadStudents();
+        }catch(err){
+          console.error(err);
+          toast('Güncellenemedi: ' + err.message, 'error');
+        }
+      });
+
+      document.getElementById('nCancel').addEventListener('click', ()=>{
+        CURRENT_NOTE_ID = null;
+        noteModal.close();
+      });
+      noteModal.addEventListener('click', (e)=>{
+        if (e.target === noteModal){
+          CURRENT_NOTE_ID = null;
+          noteModal.close();
+        }
+      });
+
+      document.getElementById('btnNewStudent').addEventListener('click', ()=>{
+        ['mName','mTrack','mPhone','mMother','mMotherPhone','mFather','mFatherPhone','mBirth','mUni','mDept','mGrad','mSummary','mResources'].forEach(id=>{
+          const el = document.getElementById(id);
+          if (el.tagName === 'SELECT') el.selectedIndex = 0; else el.value = '';
+        });
+        EDIT_MODE = false;
+        document.getElementById('modalSave').textContent = 'Kaydet';
+        modal.showModal();
+      });
+
+      document.getElementById('btnEdit').addEventListener('click', ()=>{
+        if (!CURRENT) return;
+        document.getElementById('mName').value        = CURRENT.name || '';
+        document.getElementById('mTrack').value       = CURRENT.track || 'SAY1';
+        document.getElementById('mPhone').value       = CURRENT.phone || '';
+        document.getElementById('mMother').value      = CURRENT.motherName || '';
+        document.getElementById('mMotherPhone').value = CURRENT.motherPhone || '';
+        document.getElementById('mFather').value      = CURRENT.fatherName || '';
+        document.getElementById('mFatherPhone').value = CURRENT.fatherPhone || '';
+        document.getElementById('mRelative').value = CURRENT.relativeName || '';
+        document.getElementById('mRelativePhone').value = CURRENT.relativePhone || '';
+        document.getElementById('mBirth').value       = toDateInput(CURRENT.birthDate);
+        document.getElementById('mUni').value         = CURRENT.targetUniversity || '';
+        document.getElementById('mDept').value        = CURRENT.targetDepartment || '';
+        document.getElementById('mGrad').value        = CURRENT.graduationStatus || '';
+        document.getElementById('mSummary').value     = CURRENT.summary || '';
+        document.getElementById('mResources').value   = CURRENT.resources || '';
+        EDIT_MODE = true;
+        document.getElementById('modalSave').textContent = 'Güncelle';
+        modal.showModal();
+      });
+
+      document.getElementById('modalSave').addEventListener('click', async (e)=>{
+        e.preventDefault();
+        const data = {
+          name: document.getElementById('mName').value.trim(),
+          track: document.getElementById('mTrack').value,
+          phone: document.getElementById('mPhone').value.trim(),
+          motherName: document.getElementById('mMother').value.trim(),
+          motherPhone: document.getElementById('mMotherPhone').value.trim(),
+          fatherName: document.getElementById('mFather').value.trim(),
+          fatherPhone: document.getElementById('mFatherPhone').value.trim(),
+          relativeName: document.getElementById('mRelative').value.trim(),
+          relativePhone: document.getElementById('mRelativePhone').value.trim(),
+          birthDate: document.getElementById('mBirth').value ? new Date(document.getElementById('mBirth').value) : null,
+          targetUniversity: document.getElementById('mUni').value.trim(),
+          targetDepartment: document.getElementById('mDept').value.trim(),
+          graduationStatus: document.getElementById('mGrad').value,
+          summary: document.getElementById('mSummary').value.trim(),
+          resources: document.getElementById('mResources').value.trim(),
+          ...(EDIT_MODE ? {} : { ownerUid: auth.currentUser.uid, archived: false, lastNoteAt: null, createdAt: firebase.firestore.FieldValue.serverTimestamp() })
+        };
+        if (!data.name){ toast('Ad Soyad gerekli','error'); return; }
+
+        try{
+          if (EDIT_MODE && CURRENT_ID){
+            await db.collection('students').doc(CURRENT_ID).update(data);
+            toast('Öğrenci güncellendi ✅');
+            const snap = await db.collection('students').doc(CURRENT_ID).get();
+            if (snap.exists) openDetail(snap.id, snap.data());
+          } else {
+            await db.collection('students').add(data);
+            toast('Öğrenci eklendi ✅');
+          }
+          EDIT_MODE = false;
+          document.getElementById('modalSave').textContent = 'Kaydet';
+          modal.close();
+          loadStudents();
+        }catch(err){
+          console.error(err);
+          toast('Kaydedilemedi: ' + err.message, 'error');
+        }
+      });
+
+      document.getElementById('modalCancel').addEventListener('click', ()=>{
+        EDIT_MODE = false;
+        document.getElementById('modalSave').textContent = 'Kaydet';
+        modal.close();
+      });
+      modal.addEventListener('click', (e)=>{
+        if(e.target === modal){
+          EDIT_MODE = false;
+          document.getElementById('modalSave').textContent = 'Kaydet';
+          modal.close();
+        }
+      });
+
+      document.getElementById('btnArchive').addEventListener('click', async ()=>{
+        if (!CURRENT_ID) return;
+        const makeArchived = !CURRENT?.archived;
+        try{
+          await db.collection('students').doc(CURRENT_ID).update({ archived: makeArchived });
+          CURRENT.archived = makeArchived;
+          toast(makeArchived ? 'Arşive gönderildi 📦' : 'Arşivden çıkarıldı 🗂️');
+          $('#dArchivedBadge').style.display = makeArchived ? 'inline' : 'none';
+          $('#btnArchive').textContent = makeArchived ? 'Arşivden Çıkar' : 'Arşive Gönder';
+          await loadStudents();
+        }catch(err){
+          console.error(err);
+          toast('Arşiv işlemi yapılamadı: ' + err.message, 'error');
+        }
+      });
+
+      document.getElementById('btnDelete').addEventListener('click', async ()=>{
+        if (!CURRENT_ID) return;
+        const ok = confirm('Bu öğrenciyi ve tüm görüşme notlarını silmek istediğinizden emin misiniz?');
+        if (!ok) return;
+        try{
+          const notesSnap = await db.collection('notes')
+            .where('studentId','==',CURRENT_ID)
+            .where('ownerUid','==',auth.currentUser.uid)
+            .get();
+          const batch = db.batch();
+          notesSnap.forEach(n => batch.delete(n.ref));
+          if (!notesSnap.empty) await batch.commit();
+          await db.collection('students').doc(CURRENT_ID).delete();
+          toast('Öğrenci ve notları silindi ✅');
+          CURRENT_ID = null; CURRENT = null;
+          detailView.classList.add('hidden');
+          listView.classList.remove('hidden');
+          loadStudents();
+        }catch(err){
+          console.error(err);
+          toast('Silinemedi: ' + err.message, 'error');
+        }
+      });
+
+      document.getElementById('btnBack').addEventListener('click', ()=>{
+        detailView.classList.add('hidden');
+        listView.classList.remove('hidden');
+      });
+      document.getElementById('btnAddNote').addEventListener('click', addNote);
+
+      sortSel.addEventListener('change', e=>{ SORT=e.target.value; loadStudents(); });
+      search?.addEventListener('input', ()=> loadStudents());
+      showArchived?.addEventListener('change', ()=> loadStudents());
+
+      loadStudents();
+    }
+
+    // ===== Ayarlar modal olayları ve başlangıç =====
+    document.getElementById('btnSettings').addEventListener('click', ()=>{
+      // girişte inputları mevcut temaya dolduruyoruz
+      $('#cBg').value     = toHex(getComputedStyle(document.documentElement).getPropertyValue('--bg'));
+      $('#cCard').value   = toHex(getComputedStyle(document.documentElement).getPropertyValue('--card'));
+      $('#cAccent').value = toHex(getComputedStyle(document.documentElement).getPropertyValue('--accent'));
+      $('#cDanger').value = toHex(getComputedStyle(document.documentElement).getPropertyValue('--danger'));
+      $('#cBorder').value = toHex(getComputedStyle(document.documentElement).getPropertyValue('--border'));
+      settingsModal.showModal();
+    });
+    document.getElementById('btnThemeSave').addEventListener('click', (e)=>{
+      e.preventDefault();
+      saveTheme();
+    });
+    document.getElementById('btnThemeReset').addEventListener('click', (e)=>{
+      e.preventDefault();
+      localStorage.removeItem('rehberlik_theme');
+      applyTheme(DEFAULT_THEME);
+      toast('Varsayılan tema yüklendi');
+    });
+    settingsModal.addEventListener('click', (e)=>{
+      if(e.target === settingsModal) settingsModal.close();
+    });
+
+    // İlk yüklemede tema uygula
+    loadTheme();
+  
+      function updateCallButtons(){
+        const s = CURRENT || {};
+        const studentTel = (s.phone || '').replace(/\s+/g,'');
+        const motherTel  = (s.motherPhone || '').replace(/\s+/g,'');
+        const fatherTel  = (s.fatherPhone || '').replace(/\s+/g,'');
+        const relativeTel= (s.relativePhone || '').replace(/\s+/g,'');
+
+        const callStudent = document.getElementById('btnCallStudent');
+        const callMother  = document.getElementById('btnCallMother');
+        const callFather  = document.getElementById('btnCallFather');
+
+        if (callStudent) callStudent.href = studentTel ? `tel:${studentTel}` : '#';
+        if (callMother)  callMother.href  = motherTel  ? `tel:${motherTel}`   : (relativeTel ? `tel:${relativeTel}` : '#');
+
+        // Father call button: if father phone yoksa ve yakın telefon varsa yakına bağlan
+        if (callFather){
+          if (fatherTel) callFather.href = `tel:${fatherTel}`;
+          else if (relativeTel) callFather.href = `tel:${relativeTel}`;
+          else callFather.href = '#';
+        }
+      }
+
+</script>
+<dialog id="dlgProfile"><form method="dialog" style="padding:16px;max-width:560px;width:clamp(360px,80vw,560px)"><h3>Hesap Bilgilerim</h3><div class="muted"><div id="profileBox">Yükleniyor…</div></div><div class="row" style="justify-content:flex-end;margin-top:14px"><button class="btn-primary">Kapat</button></div>
+<div class="card" id="pwdCard" style="margin-top:12px">
+<div style="font-weight:700;margin-bottom:6px">Şifre Değiştir</div>
+<div class="muted" style="margin-bottom:8px">E-posta/şifre ile giriş yapan kullanıcılar için geçerlidir. Güvenlik gereği önce yeniden doğrulama istenir.</div>
+<div class="row" style="gap:8px;flex-direction:column;align-items:stretch">
+<div style="display:grid;gap:6px">
+<label for="curPass" style="font-size:12px;opacity:.8">Mevcut Şifre</label>
+<input id="curPass" placeholder="Mevcut şifrenizi yazın" type="password"/>
+</div>
+<div style="display:grid;gap:6px">
+<label for="newPass" style="font-size:12px;opacity:.8">Yeni Şifre</label>
+<input id="newPass" placeholder="Yeni şifre (en az 6 karakter)" type="password"/>
+</div>
+<div style="display:grid;gap:6px">
+<label for="newPass2" style="font-size:12px;opacity:.8">Yeni Şifre (Tekrar)</label>
+<input id="newPass2" placeholder="Yeni şifreyi tekrar yazın" type="password"/>
+</div>
+<button class="btn-primary" id="btnChangePass" type="button" style="padding:10px 16px;font-size:15px">Şifreyi Güncelleyin</button>
+</div>
+<div class="muted" id="pwdMsg" style="margin-top:8px"></div>
+</div>
+</form></dialog><dialog id="dlgAbout"><form method="dialog" style="padding:16px;max-width:560px;width:clamp(360px,80vw,560px)"><h3>Hakkında</h3><div class="muted"><p>Rehberlik Sistemi — öğrenci takibi, görüşme kayıtları ve arşivleme için hafif bir PWA arayüzü.</p><p class="muted">Bu pencereyi kendi metninizle güncelleyebilirsiniz.</p></div><div class="row" style="justify-content:flex-end;margin-top:14px"><button class="btn-primary">Kapat</button></div></form></dialog><dialog id="dlgHelp"><form method="dialog" style="padding:16px;max-width:560px;width:clamp(360px,80vw,560px)"><h3>Yardım</h3><div class="muted"><ul style="margin:0 0 8px 18px"><li><b>Kullanım kılavuzu:</b> Uygulamanın temel adımları ve ipuçları</li><li><b>Bize ulaşın:</b> Sorun ve geri bildirimler için e‑posta gönderin</li></ul> <div id="helpDynamic"></div></div><div class="row" style="justify-content:flex-end;margin-top:14px"><button class="btn-primary">Kapat</button></div></form></dialog>
+<script>
+// === Hesabım menüsü JS ===
+(function(){
+  const btn = document.getElementById('btnAccount');
+  const dd  = document.getElementById('accountDropdown');
+  const dlgProfile = document.getElementById('dlgProfile');
+  const dlgAbout   = document.getElementById('dlgAbout');
+  const dlgHelp    = document.getElementById('dlgHelp');
+  const helpDyn    = document.getElementById('helpDynamic');
+
+  function toggleDD(show){
+    if (!dd) return;
+    if (show === true){ dd.classList.remove('hidden'); return; }
+    if (show === false){ dd.classList.add('hidden'); return; }
+    dd.classList.toggle('hidden');
+  }
+
+  // Outside click & ESC to close
+  document.addEventListener('click', (e)=>{
+    if (!dd || !btn) return;
+    if (dd.classList.contains('hidden')) return;
+    const inside = dd.contains(e.target) || btn.contains(e.target);
+    if (!inside) toggleDD(false);
+  });
+  document.addEventListener('keydown', (e)=>{
+    if (e.key === 'Escape') toggleDD(false);
+  });
+
+  if (btn){
+    btn.addEventListener('click', ()=> toggleDD());
+  }
+
+  // Item clicks
+  if (dd){
+    dd.addEventListener('click', async (e)=>{
+      const b = e.target.closest('button[data-action]');
+      if (!b) return;
+      const action = b.getAttribute('data-action');
+      toggleDD(false);
+      if (action === 'profile'){
+        // Fill profile info from Firebase Auth
+        const box = document.getElementById('profileBox');
+        try{
+          const u = (window.firebase && firebase.auth().currentUser) || null;
+          if (!u){ box.textContent = 'Giriş yapılmadı.'; }
+          else {
+            let html = '<div class="kv-row"><div class="k" style="white-space:nowrap">E-posta</div><div class="v" style="white-space:nowrap">'+ (u.email || '—') +'</div></div>';
+            
+            box.innerHTML = '<div class="kv-container">'+html+'</div>';
+          }
+        }catch(_){}
+        dlgProfile.showModal();
+      }
+      if (action === 'about'){
+        dlgAbout.showModal();
+      }
+      if (action === 'guide'){
+        if (helpDyn) helpDyn.innerHTML = '<div class="longbox"><div class="title">Kullanım Kılavuzu</div><div class="body">• Giriş yapın<br>• Öğrenci ekleyin veya arayın<br>• Detay sayfasından görüşme ekleyin, düzenleyin<br>• Arşivlemeyi Ana Liste → Öğrenci detayı üzerinden yapabilirsiniz.</div></div>';
+        dlgHelp.showModal();
+      }
+      if (action === 'logout'){
+        try{ await firebase.auth().signOut(); }catch(_){}
+        return;
+      }
+      if (action === 'contact'){
+        if (helpDyn) helpDyn.innerHTML = '<div class="longbox"><div class="title">Bize Ulaşın</div><div class="body"><a class="btn" href="mailto:musaisler1@gmail.com">E‑posta gönder</a></div></div>';
+        dlgHelp.showModal();
+      }
+    });
+  }
+})();
+</script>
+<dialog id="notificationsModal"><form method="dialog" style="padding:16px;max-width:760px;width:clamp(360px,90vw,760px)"><h3>Bildirimler</h3><div class="card" id="notifCompose" style="display:none;gap:8px">
+<div style="font-weight:700;margin-bottom:6px">Yeni Bildirim (Sadece Ana Hesap)</div>
+<input id="notifTitle" placeholder="Başlık"/>
+<textarea id="notifBody" placeholder="Mesaj" style="min-height:120px"></textarea>
+<div class="row" style="justify-content:flex-end;gap:8px">
+<button class="btn" id="btnNotifClear" type="button">Temizle</button>
+<button class="btn-primary" id="btnNotifSend" type="button">Yayınla</button>
+</div>
+</div><div class="card" id="pendingWrap" style="display:none;gap:8px;margin-top:10px">
+<div style="font-weight:700;margin-bottom:6px">Onay Bekleyen Kullanıcılar</div>
+<div class="pending-users" id="pendingUsers"></div>
+</div><div class="card" style="margin-top:10px">
+<div style="font-weight:700;margin-bottom:6px">Tüm Bildirimler</div>
+<div class="notif-list" id="notifList"></div>
+</div><div class="row" style="justify-content:flex-end;margin-top:14px"><button class="btn-primary">Kapat</button></div></form></dialog>
+<script>
+// === Bildirimler & Admin Onayları ===
+(function(){
+  const ADMIN_EMAIL = 'musaisler1@gmail.com';
+  const modal = document.getElementById('notificationsModal');
+  const btnOpen = document.getElementById('btnNotifications');
+  const badge = document.getElementById('notifBadge');
+  const compose = document.getElementById('notifCompose');
+  const pendingWrap = document.getElementById('pendingWrap');
+  const listEl = document.getElementById('notifList');
+  const titleEl = document.getElementById('notifTitle');
+  const bodyEl  = document.getElementById('notifBody');
+  const btnSend = document.getElementById('btnNotifSend');
+  const btnClear= document.getElementById('btnNotifClear');
+  const pendingBox = document.getElementById('pendingUsers');
+
+  // Last seen notifications timestamp saved on users/{uid}
+  async function getLastSeen(){
+    const u = firebase.auth().currentUser;
+    if (!u) return null;
+    try {
+      const doc = await db.collection('users').doc(u.uid).get();
+      return doc.exists ? (doc.data().lastSeenNotifAt || null) : null;
+    } catch(_) { return null; }
+  }
+  async function setLastSeen(nowTs){
+    const u = firebase.auth().currentUser;
+    if (!u) return;
+    try {
+      await db.collection('users').doc(u.uid).set({
+        lastSeenNotifAt: nowTs || firebase.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+    } catch(_) {}
+  }
+
+  async function loadNotificationsAndBadge(){
+    const u = firebase.auth().currentUser;
+    if (!u) return;
+    // Show compose/pending only for admin
+    const isAdmin = (u.email || '').toLowerCase() === ADMIN_EMAIL.toLowerCase();
+    compose.style.display = isAdmin ? 'grid' : 'none';
+    pendingWrap.style.display = isAdmin ? 'grid' : 'none';
+
+    // Load notifications
+    let snap;
+    try {
+      snap = await db.collection('notifications').orderBy('createdAt','desc').limit(50).get();
+    } catch(e) {
+      listEl.innerHTML = '<div class="muted">Bildiriler yüklenemedi: ' + (e.message || e) + '</div>';
+      return;
+    }
+    const rows = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    listEl.innerHTML = rows.map(n => {
+      const when = n.createdAt && n.createdAt.toDate ? n.createdAt.toDate().toLocaleString('tr-TR',{dateStyle:'medium', timeStyle:'short'}) : '—';
+      const a = (n.authorEmail || '—');
+      return '<div class="notif-item"><div class="t">'+ (n.title||'') +'</div><div class="muted" style="font-size:12px">'+ when +' • '+ a +'</div><div class="m">'+ (n.body||'') +'</div></div>';
+    }).join('') || '<div class="muted">Henüz bildirim yok</div>';
+
+    // Badge: count items newer than lastSeen
+    const lastSeen = await getLastSeen();
+    let unseen = 0;
+    if (lastSeen && lastSeen.toDate){
+      const last = lastSeen.toDate().getTime();
+      rows.forEach(n => {
+        const t = (n.createdAt && n.createdAt.toDate) ? n.createdAt.toDate().getTime() : 0;
+        if (t > last) unseen++;
+      });
+    } else {
+      // If no lastSeen, count all as unseen but cap to 9+
+      unseen = rows.length;
+    }
+    badge.textContent = unseen > 9 ? '9+' : String(unseen);
+    badge.style.display = unseen > 0 ? 'inline-block' : 'none';
+
+    if (isAdmin){
+      await loadPendingUsers();
+    }
+  }
+
+  async function loadPendingUsers(){
+    // Admin: list users where approved == false
+    try{
+      const q = await db.collection('users').where('approved','==', false).limit(50).get();
+      if (q.empty){ pendingBox.innerHTML = '<div class="muted">Onay bekleyen kullanıcı yok</div>'; return; }
+      pendingBox.innerHTML = '';
+      // /*CLIENT_SORT_PENDING*/ sort by createdAt asc on client
+      const docs = q.docs.slice().sort((a,b)=>{
+        const ta = a.data()?.createdAt?.toDate ? a.data().createdAt.toDate().getTime() : 0;
+        const tb = b.data()?.createdAt?.toDate ? b.data().createdAt.toDate().getTime() : 0;
+        return ta - tb;
+      });
+
+      docs.forEach(doc => {
+        const v = doc.data() || {};
+        const div = document.createElement('div');
+        div.className = 'u';
+        div.innerHTML = '<span class="email">'+ (v.email || doc.id) +'</span>'
+                      + '<span class="row" style="gap:6px">'
+                      +   '<button class="btn btn-approve" data-act="approve" data-id="'+ doc.id +'">Onayla</button>'
+                      +   '<button class="btn btn-reject" data-act="reject" data-id="'+ doc.id +'">Sil</button>'
+                      + '</span>';
+        pendingBox.appendChild(div);
+      });
+    }catch(e){
+      pendingBox.innerHTML = '<div class="muted">Kullanıcılar yüklenemedi: ' + (e.message || e) + '</div>';
+    }
+  }
+
+  // Approve/Reject (admin)
+  if (pendingWrap){
+    pendingWrap.addEventListener('click', async (e)=>{
+      const b = e.target.closest('button[data-act]'); if (!b) return;
+      const id = b.getAttribute('data-id');
+      const act = b.getAttribute('data-act');
+      try{
+        if (act === 'approve'){
+          await db.collection('users').doc(id).set({
+            approved: true,
+            approvedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            approvedBy: (firebase.auth().currentUser || {}).uid || null
+          }, { merge:true });
+        } else if (act === 'reject'){
+          // Optional: delete user doc (does not delete auth user)
+          await db.collection('users').doc(id).delete();
+        }
+        await loadPendingUsers();
+        alert(act === 'approve' ? 'Onaylandı ✅' : 'Silindi 🗑️');
+      }catch(err){
+        alert('İşlem başarısız: ' + (err.message || err));
+      }
+    });
+  }
+
+  // Publish notification (admin)
+  if (btnSend){
+    btnSend.addEventListener('click', async ()=>{
+      const u = firebase.auth().currentUser;
+      if (!u) return;
+      if ((u.email || '').toLowerCase() !== ADMIN_EMAIL.toLowerCase()){
+        alert('Bu işlem yalnızca ana hesap tarafından yapılabilir.');
+        return;
+      }
+      const title = (titleEl.value || '').trim();
+      const body  = (bodyEl.value || '').trim();
+      if (!title || !body){ alert('Başlık ve mesaj gerekli'); return; }
+      try{
+        await db.collection('notifications').add({
+          title, body,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          authorEmail: u.email,
+        });
+        titleEl.value = ''; bodyEl.value = '';
+        await loadNotificationsAndBadge();
+        alert('Bildirim yayınlandı ✅');
+      }catch(e){
+        alert('Yayınlanamadı: ' + (e.message || e));
+      }
+    });
+  }
+  if (btnClear){
+    btnClear.addEventListener('click', ()=>{ titleEl.value=''; bodyEl.value=''; });
+  }
+
+  // Open modal
+  if (btnOpen){
+    btnOpen.addEventListener('click', async ()=>{
+      await loadNotificationsAndBadge();
+      modal.showModal();
+      // mark as seen
+      await setLastSeen();
+      // refresh badge
+      await loadNotificationsAndBadge();
+    });
+  }
+
+  // Update badge on login & every 60s
+  document.addEventListener('DOMContentLoaded', ()=>{
+    const tick = async ()=>{
+      if (firebase.auth().currentUser) await loadNotificationsAndBadge();
+    };
+    setInterval(tick, 60000);
+  });
+})();
+</script>
+<script>
+(function(){
+  const home = document.getElementById('btnHome');
+  function goMainLikeUserWould(){
+    // Try known app functions
+    try{
+      if (typeof window.showMainList === 'function') { window.showMainList(); return true; }
+      if (typeof window.navigateTo === 'function') { window.navigateTo('main'); return true; }
+    }catch(_){}
+    // Try clicking a likely "Ana Liste" / "Ana Sayfa" control
+    const candidates = [
+      '#btnMain', '#btnAnaListe', '[data-route="main"]', '[data-action="go-main"]',
+      'button[title="Ana Liste"]', 'a[title="Ana Liste"]', 'button:contains("Ana Liste")', 'a:contains("Ana Liste")'
+    ];
+    for (const sel of candidates){
+      try{
+        // :contains isn't supported natively; simulate
+        if (sel.includes(':contains')){
+          const text = sel.split(':contains(')[1].split(')')[0].replace(/"/g,'');
+          const btns = Array.from(document.querySelectorAll('button, a'));
+          const el = btns.find(b => (b.textContent||'').trim() === text);
+          if (el){ el.click(); return true; }
+        } else {
+          const el = document.querySelector(sel);
+          if (el){ el.click(); return true; }
+        }
+      }catch(_){}
+    }
+    // Try to show a main list container by id/class heuristics
+    const maybeMain = document.getElementById('main') || document.getElementById('mainList') || document.querySelector('.main-list');
+    const maybeDetail = document.getElementById('detail') || document.querySelector('.detail-panel');
+    if (maybeMain){ maybeMain.style.display=''; }
+    if (maybeDetail){ maybeDetail.style.display='none'; }
+    // No reload fallback — stay on page (avoids going through login)
+    return true;
+  }
+  if (home){
+    home.addEventListener('click', function(e){
+      e.preventDefault();
+      goMainLikeUserWould();
+    });
+  }
+})();</script>
+
+<script>
+(function(){
+  const home = document.getElementById('btnHome');
+  function isVisible(el){ return !!(el && el.offsetParent !== null); }
+  function clickMainLikeUser(){
+    // Preferred in-app APIs
+    try{
+      if (typeof window.showMainList === 'function'){ window.showMainList(); return true; }
+      if (typeof window.navigateTo === 'function'){ window.navigateTo('main'); return true; }
+    }catch(_){}
+    // Try id/data selectors
+    const selList = [
+      '#btnMain','#btnAnaListe','#homeMain','#goMain',
+      '[data-route="main"]','[data-action="go-main"]','[data-target="main"]'
+    ];
+    for (const sel of selList){
+      const el = document.querySelector(sel);
+      if (el && isVisible(el)){ el.click(); return true; }
+    }
+    // Try text-based buttons/links (case-insensitive)
+    const texts = ['ana liste','ana sayfa','öğrenciler','liste'];
+    const candidates = Array.from(document.querySelectorAll('button, a, [role="button"]'));
+    for (const t of texts){
+      const el = candidates.find(x => isVisible(x) && (x.textContent||'').trim().toLowerCase().includes(t));
+      if (el){ el.click(); return true; }
+    }
+    // Try to toggle panels manually (hide detail/show main) as last resort
+    const main = document.getElementById('main') || document.getElementById('mainList') || document.querySelector('.main-list');
+    const detail = document.getElementById('detail') || document.querySelector('.detail-panel');
+    if (main) main.style.display = '';
+    if (detail) detail.style.display = 'none';
+    return true;
+  }
+  if (home){
+    home.addEventListener('click', function(e){
+      e.preventDefault();
+      clickMainLikeUser();
+    });
+  }
+})();
+</script>
+
+<script>
+(function(){
+  function $(id){ return document.getElementById(id); }
+  const btn = $('btnChangePass');
+  const msg = $('pwdMsg');
+  async function changePassword(){
+    if (!btn) return;
+    const u = (firebase && firebase.auth && firebase.auth().currentUser) ? firebase.auth().currentUser : null;
+    if (!u){ msg.textContent = 'Giriş yapılmamış.'; return; }
+    const providers = (u.providerData || []).map(p => p.providerId);
+    if (!providers.includes('password')){
+      msg.textContent = 'Bu işlem sadece e-posta/şifre ile giriş yapan hesaplarda geçerlidir.';
+      return;
+    }
+    const cur = $('curPass').value.trim();
+    const p1  = $('newPass').value.trim();
+    const p2  = $('newPass2').value.trim();
+    if (!cur || !p1 || !p2){ msg.textContent = 'Lütfen tüm alanları doldurun.'; return; }
+    if (p1.length < 6){ msg.textContent = 'Yeni şifre en az 6 karakter olmalı.'; return; }
+    if (p1 !== p2){ msg.textContent = 'Yeni şifreler eşleşmiyor.'; return; }
+    msg.textContent = 'Doğrulanıyor…';
+    try{
+      const cred = firebase.auth.EmailAuthProvider.credential(u.email, cur);
+      await u.reauthenticateWithCredential(cred);
+      msg.textContent = 'Güncelleniyor…';
+      await u.updatePassword(p1);
+      msg.textContent = 'Şifre güncellendi ✅';
+      $('curPass').value = ''; $('newPass').value = ''; $('newPass2').value = '';
+    }catch(e){
+      msg.textContent = 'İşlem başarısız: ' + (e && e.message ? e.message : e);
+    }
+  }
+  if (btn){ btn.addEventListener('click', changePassword); }
+})();
+</script>
+<style>
+/* --- Dropdown visibility fix for sort select --- */
+#sortBy { color: #E6EEF8; }
+#sortBy option, #sortBy optgroup { 
+  color: #111 !important; 
+  background: #ffffff !important; 
+}
+</style>
+
+<!-- HAFTALIK PLAN MODALI -->
+<dialog id="weeklyPlanModal">
+  <form method="dialog" style="padding:16px;max-width:960px;width:clamp(520px,95vw,960px)">
+    <h3 style="margin:6px 0 12px 0">Haftalık Plan Oluştur</h3>
+    <div class="grid" style="gap:10px">
+      <label class="muted" for="wpStudent">Öğrenci Seç</label>
+      <select id="wpStudent"></select>
+      <div class="plan-hint">Her gün için en fazla 8 satır; 1) Saat/Süre, 2) Ders, 3) Hedef (soru/konu) girin.</div>
+      <label class="muted" for="wpStartDate" style="margin-top:8px">Plan Başlangıç Tarihi (opsiyonel)</label><input id="wpStartDate" type="date"/><div class="plan-hint">Bir tarih seçerseniz günler o tarihten başlayarak otomatik sıralanır ve gün isminin yanında tarih görünür.</div><div id="wpDays"></div>
+<label class="muted" for="wpNotes" style="margin-top:8px">Notlar (opsiyonel)</label>
+<input id="wpNotes" type="text" placeholder="Kısa not (tek satır)" />
+    </div>
+    <div class="plan-actions">
+  <button class="btn" id="wpCancel" type="button">İptal</button>
+  <button class="btn" id="wpPdf" type="button">📄 PDF</button>
+  <button class="btn" id="wpPdfTwoCol" type="button">📄 PDF 2 Sütun (Dikey)</button>
+  <button class="btn" id="wpPdfLandscape" type="button">📄 PDF Yatay</button>
+  <button class="btn" id="wpPdfUltra" type="button">📄 PDF Ultra (3 sütun)</button>
+  <button class="btn-primary" id="wpSave" value="save">Kaydet ve Ata</button>
+</div>
+  </form>
+</dialog>
+
+
+<script>
+// === Haftalık Plan JS ===
+(function(){
+  const DAYS = ['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar'];
+  let ALL_STUDENTS_CACHE = [];
+  let buildingDaysDone = false;
+
+  function el(tag, attrs={}, children=[]) {
+    const e = document.createElement(tag);
+    for (const [k,v] of Object.entries(attrs)) {
+      if (k === 'class') e.className = v;
+      else if (k === 'html') e.innerHTML = v;
+      else e.setAttribute(k, v);
+    }
+    (Array.isArray(children)?children:[children]).forEach(c=>{
+      if (typeof c === 'string') e.appendChild(document.createTextNode(c));
+      else if (c) e.appendChild(c);
+    });
+    return e;
+  }
+
+  function buildDaySection(dayName){
+    const det = el('details', {class:'plan-day'});
+    det.appendChild(el('summary', {}, [dayName]));
+    const inner = el('div', {class:'inner'});
+    for (let i=0;i<8;i++){
+      const row = el('div', {class:'plan-row'});
+      row.appendChild(el('input', {placeholder:'Saat / Süre (örn: 17:00-18:00 veya 40 dk)', 'data-field':`${dayName}:${i}:time`}));
+      row.appendChild(el('input', {placeholder:'Ders / Konu', 'data-field':`${dayName}:${i}:course`}));
+      row.appendChild(el('input', {placeholder:'Hedef (örn: 50 soru)', 'data-field':`${dayName}:${i}:target`}));
+      inner.appendChild(row);
+    }
+    det.appendChild(inner);
+    return det;
+  }
+
+  async function loadAllStudentsIntoSelect(){
+    const sel = document.getElementById('wpStudent');
+    if (!sel) return;
+    sel.innerHTML = '<option value="">— Öğrenci seçin —</option>';
+    try{
+      // We query students belonging to current user
+      const snap = await db.collection('students').where('ownerUid','==', auth.currentUser.uid).get();
+      ALL_STUDENTS_CACHE = [];
+      snap.forEach(d=> ALL_STUDENTS_CACHE.push({ id:d.id, ...d.data() }));
+      ALL_STUDENTS_CACHE.sort((a,b)=> (a.name||'').localeCompare((b.name||''), 'tr-TR'));
+      for (const s of ALL_STUDENTS_CACHE){
+        const opt = document.createElement('option');
+        opt.value = s.id;
+        opt.textContent = s.name || s.id;
+        sel.appendChild(opt);
+      }
+      // Preselect CURRENT student if modal opened from detail page context
+      if (window.CURRENT_ID){
+        sel.value = window.CURRENT_ID;
+      }
+    }catch(e){
+      console.error(e);
+    }
+  }
+
+  function buildDaysOnce(){
+    if (buildingDaysDone) return;
+    const box = document.getElementById('wpDays');
+    if (!box) return;
+    box.innerHTML = '';
+    const grid = el('div');
+    DAYS.forEach(d => grid.appendChild(buildDaySection(d)));
+    box.appendChild(grid);
+    buildingDaysDone = true;
+  }
+
+  async function saveWeeklyPlan(){
+    const sel = document.getElementById('wpStudent');
+    const studentId = (sel && sel.value) ? sel.value : '';
+    if (!studentId){ toast('Öğrenci seçin','error'); return; }
+    const student = ALL_STUDENTS_CACHE.find(s=>s.id===studentId) || {};
+    const inputs = document.querySelectorAll('[data-field]');
+    const notesEl = document.getElementById('wpNotes');
+    const __notes = notesEl ? (notesEl.value || '').trim() : '';
+
+    const plan = {};
+    DAYS.forEach(d=> plan[d] = []);
+    inputs.forEach(inp=>{
+      const key = inp.getAttribute('data-field'); // "Pazartesi:3:course"
+      const [day, idxStr, field] = key.split(':');
+      const idx = parseInt(idxStr,10);
+      if (!plan[day][idx]) plan[day][idx] = { time:'', course:'', target:'' };
+      plan[day][idx][field] = (inp.value || '').trim();
+    });
+
+    // remove empty rows
+    DAYS.forEach(d=>{
+      plan[d] = plan[d].filter(row=> row && (row.time || row.course || row.target));
+    });
+
+    try{
+      await db.collection('weeklyPlans').add({
+        ownerUid: auth.currentUser.uid,
+        studentId,
+        studentName: student.name || null,
+        plan,
+        notes: __notes,
+        startDate: (document.getElementById('wpStartDate') && document.getElementById('wpStartDate').value) || null,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      toast('Haftalık plan kaydedildi ✅');
+      document.getElementById('weeklyPlanModal').close();
+      // If detail open for same student, refresh
+      if (window.CURRENT_ID && window.CURRENT_ID === studentId){
+        await loadWeeklyPlanForStudent(studentId);
+      }
+    }catch(e){
+      console.error(e);
+      toast('Plan kaydedilemedi: ' + e.message, 'error');
+    }
+  }
+
+  async function loadWeeklyPlanForStudent(studentId){
+    const render = document.getElementById('weeklyPlanRender');
+    if (!render) return;
+    render.innerHTML = '<div class="muted">Yükleniyor…</div>';
+    try{
+      const q = await db.collection('weeklyPlans')
+  .where('ownerUid','==', auth.currentUser.uid)
+  .where('studentId','==', studentId)
+  .get();
+      if (q.empty){ render.innerHTML = '<div class="muted">Atanmış plan yok</div>'; return; }
+// Select latest by createdAt client-side
+let docLatest = null; let latestTs = 0;
+q.forEach(doc=>{ const data = doc.data(); const t = (data.createdAt && data.createdAt.toMillis) ? data.createdAt.toMillis() : 0; if (t >= latestTs){ latestTs = t; docLatest = data; }});
+const d = docLatest || q.docs[0].data();
+const plan = d.plan || {};
+const startISO = d.startDate || null;
+const seq = (window.__planUtils ? window.__planUtils.buildSequenceFromStart(startISO) : DAYS.map(n=>({name:n,label:n})))
+  .filter(({name}) => (plan[name] && plan[name].length));
+const parts = [];
+seq.forEach(({name,label})=>{
+  const rows = plan[name] || [];
+  const rowsHtml = rows.map(r=> `
+    <div class="slot">
+      <div>${(r.time||'—')}</div>
+      <div>${(r.course||'—')}</div>
+      <div>${(r.target||'—')}</div>
+    </div>
+  `).join('');
+  parts.push(`<div class="day"><div class="day-title">${label}</div>${rowsHtml}</div>`);
+});
+render.innerHTML = parts.length ? parts.join('') : '<div class="muted">Plan boş</div>';
+    }catch(e){
+      console.error(e);
+      render.innerHTML = '<div class="error">Plan yüklenemedi: '+(e.message||e)+'</div>';
+    }
+  }
+  window.loadWeeklyPlanForStudent = loadWeeklyPlanForStudent;
+
+  // Wire header button
+  document.addEventListener('DOMContentLoaded', ()=>{
+    const btn = document.getElementById('btnWeeklyPlan');
+    const dlg = document.getElementById('weeklyPlanModal');
+    const btnCancel = document.getElementById('wpCancel');
+    const btnSave = document.getElementById('wpSave');
+    if (btn){
+      btn.addEventListener('click', async ()=>{
+        buildDaysOnce();
+        await loadAllStudentsIntoSelect();
+        dlg.showModal();
+      });
+    }
+    if (btnCancel){
+      btnCancel.addEventListener('click', ()=> dlg.close());
+    }
+    if (btnSave){
+      btnSave.addEventListener('click', (e)=>{ e.preventDefault(); saveWeeklyPlan(); });
+    }
+  });
+
+  // Ensure weekly plan card exists on detail view and populate
+  const _openDetail_orig = window.openDetail;
+  window.openDetail = function(id, s){
+    _openDetail_orig.call(this, id, s);
+    // Create card if not exists
+    if (!document.getElementById('weeklyPlanCard')){
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.id = 'weeklyPlanCard';
+      card.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div style="font-weight:700">Haftalık Plan</div><button class="btn" id="btnPlanPdfDetail" type="button">📄 PDF</button></div><div id="weeklyPlanRender" style="display:grid; gap:8px; grid-template-columns:repeat(2,minmax(0,1fr))"></div>';
+      // append near the end of detail view
+      document.getElementById('detailView').appendChild(card);
+    }
+    loadWeeklyPlanForStudent(id);
+  };
+})();
+</script>
+
+<div id="printPlan"></div>
+
+<script>
+(function(){
+  const DAYS_TR = ['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar'];
+// ---- TEMP PLAN memory to keep inputs across date/student/order changes ----
+window.__TEMP_PLAN = window.__TEMP_PLAN || {
+  'Pazartesi':[], 'Salı':[], 'Çarşamba':[], 'Perşembe':[], 'Cuma':[], 'Cumartesi':[], 'Pazar':[]
+};
+document.addEventListener('input', function(e){
+  const el = e.target;
+  if (!el || !el.getAttribute) return;
+  const key = el.getAttribute('data-field');
+  if (!key) return;
+  const parts = key.split(':');
+  if (parts.length !== 3) return;
+  const day = parts[0]; const idx = parseInt(parts[1],10); const field = parts[2];
+  if (!window.__TEMP_PLAN[day]) window.__TEMP_PLAN[day] = [];
+  if (!window.__TEMP_PLAN[day][idx]) window.__TEMP_PLAN[day][idx] = { time:'', course:'', target:'' };
+  window.__TEMP_PLAN[day][idx][field] = el.value;
+});
+  function dateToTurkishDayName(d){
+    const names = ['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'];
+    return names[d.getDay()];
+  }
+  function addDays(date, n){
+    const d = new Date(date);
+    d.setDate(d.getDate()+n);
+    return d;
+  }
+  function formatDateTR(date){
+    return date.toLocaleDateString('tr-TR', { day:'2-digit', month:'2-digit', year:'numeric' });
+  }
+  function buildSequenceFromStart(startISO){
+    if (!startISO) return DAYS_TR.map((name)=>({ name, dateISO:null, label:name }));
+    const start = new Date(startISO);
+    const seq = [];
+    for (let i=0;i<7;i++){
+      const d = addDays(start, i);
+      const dayName = dateToTurkishDayName(d);
+      const dateISO = d.toISOString().slice(0,10);
+      seq.push({ name: dayName, dateISO, label: `${dayName} (${formatDateTR(d)})` });
+    }
+    return seq;
+  }
+  window.__planUtils = { buildSequenceFromStart, formatDateTR };
+})();
+</script>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', ()=>{
+  const utils = window.__planUtils;
+  const btn = document.getElementById('btnWeeklyPlan');
+  const selDate = document.getElementById('wpStartDate');
+  function rebuildDays(){
+    const startISO = selDate && selDate.value ? selDate.value : null;
+    const seq = utils.buildSequenceFromStart(startISO);
+    const box = document.getElementById('wpDays');
+    if (!box) return;
+    box.innerHTML = '';
+    seq.forEach(({name,label})=>{
+      const det = document.createElement('details');
+      det.className = 'plan-day';
+      const sum = document.createElement('summary'); sum.textContent = label; det.appendChild(sum);
+      const inner = document.createElement('div'); inner.className = 'inner';
+      for (let i=0;i<8;i++){
+        const row = document.createElement('div'); row.className = 'plan-row';
+        const t1 = document.createElement('input'); t1.placeholder='Saat / Süre'; t1.setAttribute('data-field', `${name}:${i}:time`);
+        const t2 = document.createElement('input'); t2.placeholder='Ders / Konu'; t2.setAttribute('data-field', `${name}:${i}:course`);
+        const t3 = document.createElement('input'); t3.placeholder='Hedef'; t3.setAttribute('data-field', `${name}:${i}:target`);
+        
+        // Prefill from TEMP PLAN memory
+        try{
+          const memo = (window.__TEMP_PLAN && window.__TEMP_PLAN[name] && window.__TEMP_PLAN[name][i]) || null;
+          if (memo){
+            t1.value = memo.time || '';
+            t2.value = memo.course || '';
+            t3.value = memo.target || '';
+          }
+        }catch(err){ /* noop */ }
+row.appendChild(t1); row.appendChild(t2); row.appendChild(t3);
+        inner.appendChild(row);
+      }
+      det.appendChild(inner);
+      box.appendChild(det);
+    });
+  }
+  if (btn) btn.addEventListener('click', rebuildDays);
+  if (selDate) selDate.addEventListener('change', rebuildDays);
+});
+</script>
+
+
+<script>
+(function(){
+  function todayStr(){
+    const d = new Date();
+    return d.toLocaleDateString('tr-TR', { year:'numeric', month:'long', day:'numeric' });
+  }
+  function printPlan(source){
+    const printEl = document.getElementById('printPlan');
+    if (!printEl) return;
+    const header = `
+      <div class="title">Haftalık Plan</div>
+      <div class="meta">
+        Öğrenci: <b>${source.studentName}</b><br/>
+        Tarih: ${todayStr()}
+      </div>
+    `;
+    const footer = `
+      <div class="names">
+        <div class="col"><div class="label">Danışman Adı Soyadı</div><div class="line"></div></div>
+        <div class="col"><div class="label">Öğrenci Adı Soyadı</div><div class="line"></div></div>
+      </div>
+    `;
+    printEl.innerHTML = header + source.html + footer;
+    window.print();
+  }
+
+  function buildFromModal(){
+    const nameSel = document.getElementById('wpStudent');
+    const studentName = (nameSel && nameSel.options && nameSel.selectedIndex > 0) ? nameSel.options[nameSel.selectedIndex].textContent : '—';
+    const box = document.getElementById('wpDays');
+    let html = '';
+    if (box){
+      html = Array.from(box.children).map(d=> d.outerHTML).join('');
+      // Transform to print format: replace 'details' with 'div class="day"' and keep summary as title
+      const tmp = document.createElement('div');
+      tmp.innerHTML = html;
+      const details = tmp.querySelectorAll('details.plan-day');
+      details.forEach(det=>{
+        const label = det.querySelector('summary')?.textContent || 'Gün';
+        const inner = det.querySelector('.inner');
+        const slots = Array.from(inner.querySelectorAll('.plan-row')).map(row=>{
+          const cols = row.querySelectorAll('input');
+          return `<div class="slot"><div>${cols[0].value||'—'}</div><div>${cols[1].value||'—'}</div><div>${cols[2].value||'—'}</div></div>`;
+        }).join('');
+        const repl = document.createElement('div');
+        repl.className = 'day';
+        repl.innerHTML = `<div class="day-title">${label}</div>${slots}`;
+        det.replaceWith(repl);
+      });
+      html = tmp.innerHTML;
+    }
+    const _notesVal = (document.getElementById('wpNotes')?.value || '').trim();
+    if (_notesVal){
+      html += `<div class="day"><div class="day-title">Notlar</div><div class="slot"><div>—</div><div>${_notesVal}</div><div>—</div></div></div>`;
+    }
+    return { studentName, html };
+  }
+
+  function buildFromDetail(){
+    const nameEl = document.getElementById('dName');
+    const studentName = nameEl ? (nameEl.textContent || '—') : '—';
+    const render = document.getElementById('weeklyPlanRender');
+    const html = render ? render.innerHTML : '<div class="muted">Plan bulunamadı</div>';
+    return { studentName, html };
+  }
+
+  document.addEventListener('DOMContentLoaded', ()=>{
+    const dlgBtn = document.getElementById('wpPdf');
+    if (dlgBtn){
+      dlgBtn.addEventListener('click', ()=> printPlan(buildFromModal()));
+    }
+    const observer = new MutationObserver(()=>{
+      const b = document.getElementById('btnPlanPdfDetail');
+      if (b && !b._wired){
+        b._wired = true;
+        b.addEventListener('click', ()=> printPlan(buildFromDetail()));
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+  });
+})();
+</script>
+
+
+<script>
+(function(){
+  function todayStr(){
+    const d = new Date();
+    return d.toLocaleDateString('tr-TR', { year:'numeric', month:'long', day:'numeric' });
+  }
+  function ensureDaysWrapper(html){
+    const trimmed = (html||'').trim();
+    return trimmed.startsWith('<div class="days">') ? trimmed : `<div class="days">${trimmed}</div>`;
+  }
+  function buildHeader(studentName){
+    return `<div class="title">Haftalık Plan</div>
+            <div class="meta">Öğrenci: <b>${studentName||'—'}</b> • Tarih: ${todayStr()}</div>`;
+  }
+  function buildFooter(){
+    return `<div class="names">
+              <div class="col"><div class="label">Danışman Adı Soyadı</div><div class="line"></div></div>
+              <div class="col"><div class="label">Öğrenci Adı Soyadı</div><div class="line"></div></div>
+            </div>`;
+  }
+  function buildFromDetail(){
+    const nameEl = document.getElementById('dName');
+    const studentName = nameEl ? (nameEl.textContent || '—') : '—';
+    const render = document.getElementById('weeklyPlanRender');
+    const inner = render ? render.innerHTML : '<div class="muted">Plan bulunamadı</div>';
+    return { studentName, html: inner };
+  }
+  function buildFromModal(){
+    const sel = document.getElementById('wpStudent');
+    const studentName = (sel && sel.selectedIndex>0) ? sel.options[sel.selectedIndex].textContent : '—';
+    const box = document.getElementById('wpDays');
+    if (!box) return { studentName, html:'<div class="muted">Plan bulunamadı</div>' };
+    const days = Array.from(box.querySelectorAll('details.plan-day')).map(det=>{
+      const label = det.querySelector('summary')?.textContent || 'Gün';
+      const rows = Array.from(det.querySelectorAll('.plan-row')).map(row=>{
+        const cols = row.querySelectorAll('input');
+        return `<div class="slot"><div>${cols[0].value||'—'}</div><div>${cols[1].value||'—'}</div><div>${cols[2].value||'—'}</div></div>`;
+      }).join('');
+      return `<div class="day"><div class="day-title">${label}</div>${rows}</div>`;
+    }).join('');
+    return { studentName, html: days };
+  }
+  function printPlan(source, mode){
+    const printEl = document.getElementById('printPlan');
+    if (!printEl) return;
+    const header = buildHeader(source.studentName);
+    const footer = buildFooter();
+    printEl.innerHTML = header + ensureDaysWrapper(source.html) + footer;
+
+    // Class toggles
+    document.body.classList.remove('two-col','landscape','ultra');
+    if (mode==='twoCol') document.body.classList.add('two-col');
+    if (mode==='ultra'){
+      document.body.classList.add('ultra');
+    } else if (mode==='landscape'){
+      document.body.classList.add('landscape');
+      // Hint landscape to browser via temporary @page rule
+      const st = document.createElement('style'); st.id='__page_landscape';
+      st.innerHTML='@page { size: A4 landscape; margin: 8mm; }';
+      document.head.appendChild(st);
+      setTimeout(()=>{ const x=document.getElementById('__page_landscape'); if(x) x.remove(); },0);
+    }
+    window.print();
+    setTimeout(()=> document.body.classList.remove('two-col','landscape'), 0);
+  }
+
+  // Inject buttons safely (no template string replacements)
+  function ensureButtons(){
+    // Detail card buttons
+    const card = document.getElementById('weeklyPlanCard');
+    if (card && !card.querySelector('#btnPlanPdfDetail')){
+      const header = card.querySelector(':scope > div');
+      const wrap = document.createElement('div');
+      wrap.style.display = 'flex';
+      wrap.style.gap = '6px';
+      const b1 = document.createElement('button'); b1.className='btn'; b1.id='btnPlanPdfDetail'; b1.type='button'; b1.textContent='📄 PDF';
+      const b2 = document.createElement('button'); b2.className='btn'; b2.id='btnPlanPdfDetailTwoCol'; b2.type='button'; b2.textContent='📄 PDF 2 Sütun (Dikey)';
+      const b3 = document.createElement('button'); b3.className='btn'; b3.id='btnPlanPdfDetailLandscape'; b3.type='button'; b3.textContent='📄 PDF Yatay';
+      const b4 = document.createElement('button'); b4.className='btn'; b4.id='btnPlanPdfDetailUltra'; b4.type='button'; b4.textContent='📄 PDF Ultra (3 sütun)';
+      wrap.appendChild(b1); wrap.appendChild(b2); wrap.appendChild(b3); wrap.appendChild(b4);
+      header && header.appendChild(wrap);
+    }
+    // Modal buttons next to save
+    const save = document.getElementById('wpSave');
+    if (save && !document.getElementById('wpPdf')){
+      const bU = document.createElement('button'); bU.className='btn'; bU.id='wpPdfUltra'; bU.type='button'; bU.textContent='📄 PDF Ultra (3 sütun)';
+      const b1 = document.createElement('button'); b1.className='btn'; b1.id='wpPdf'; b1.type='button'; b1.textContent='📄 PDF';
+      const b2 = document.createElement('button'); b2.className='btn'; b2.id='wpPdfTwoCol'; b2.type='button'; b2.textContent='📄 PDF 2 Sütun (Dikey)';
+      const b3 = document.createElement('button'); b3.className='btn'; b3.id='wpPdfLandscape'; b3.type='button'; b3.textContent='📄 PDF Yatay';
+      save.parentNode.insertBefore(b1, save);
+      save.parentNode.insertBefore(b2, save);
+      save.parentNode.insertBefore(b3, save);
+      save.parentNode.insertBefore(bU, save);
+    }
+  }
+
+  function wire(){
+    ensureButtons();
+    const mN = document.getElementById('wpPdf');
+    const mT = document.getElementById('wpPdfTwoCol');
+    const mL = document.getElementById('wpPdfLandscape');
+    const mU = document.getElementById('wpPdfUltra');
+    if (mN && !mN._wired){ mN._wired=true; mN.addEventListener('click', ()=> printPlan(buildFromModal(), 'normal')); }
+    if (mT && !mT._wired){ mT._wired=true; mT.addEventListener('click', ()=> printPlan(buildFromModal(), 'twoCol')); }
+    if (mL && !mL._wired){ mL._wired=true; mL.addEventListener('click', ()=> printPlan(buildFromModal(), 'landscape')); }
+    if (mU && !mU._wired){ mU._wired=true; mU.addEventListener('click', ()=> printPlan(buildFromModal(), 'ultra')); }
+
+    const dN = document.getElementById('btnPlanPdfDetail');
+    const dT = document.getElementById('btnPlanPdfDetailTwoCol');
+    const dL = document.getElementById('btnPlanPdfDetailLandscape');
+    const dU = document.getElementById('btnPlanPdfDetailUltra');
+    if (dN && !dN._wired){ dN._wired=true; dN.addEventListener('click', ()=> printPlan(buildFromDetail(), 'normal')); }
+    if (dT && !dT._wired){ dT._wired=true; dT.addEventListener('click', ()=> printPlan(buildFromDetail(), 'twoCol')); }
+    if (dL && !dL._wired){ dL._wired=true; dL.addEventListener('click', ()=> printPlan(buildFromDetail(), 'landscape')); }
+    if (dU && !dU._wired){ dU._wired=true; dU.addEventListener('click', ()=> printPlan(buildFromDetail(), 'ultra')); }
+  }
+
+  document.addEventListener('DOMContentLoaded', wire);
+  new MutationObserver(wire).observe(document.body, { childList:true, subtree:true });
+  // expose
+  window.printPlan = printPlan;
+  window.__buildFromDetail = buildFromDetail;
+  window.__buildFromModal = buildFromModal;
+})();
+</script>
+
+
+<script>
+(function(){
+  function todayStr(){
+    const d = new Date();
+    return d.toLocaleDateString('tr-TR', { year:'numeric', month:'long', day:'numeric' });
+  }
+  function ensureDaysWrapper(innerHtml){
+    const trimmed = (innerHtml||'').trim();
+    return trimmed.startsWith('<div class="days">') ? trimmed : `<div class="days">${trimmed}</div>`;
+  }
+  function header(student){ return `<div class="title">Haftalık Plan</div><div class="meta">Öğrenci: <b>${student||'—'}</b> • Tarih: ${todayStr()}</div>`; }
+  function footer(){ return `<div class="names"><div class="col"><div class="label">Danışman Adı Soyadı</div><div class="line"></div></div><div class="col"><div class="label">Öğrenci Adı Soyadı</div><div class="line"></div></div></div>`; }
+
+  function buildFromDetail(){
+    const nameEl = document.getElementById('dName');
+    const studentName = nameEl ? (nameEl.textContent || '—') : '—';
+    const render = document.getElementById('weeklyPlanRender');
+    const html = render ? render.innerHTML : '<div class="muted">Plan bulunamadı</div>';
+    return { studentName, html };
+  }
+  function buildFromModal(){
+    const sel = document.getElementById('wpStudent');
+    const studentName = (sel && sel.selectedIndex>0) ? sel.options[sel.selectedIndex].textContent : '—';
+    const box = document.getElementById('wpDays');
+    if (!box) return { studentName, html:'<div class="muted">Plan bulunamadı</div>' };
+    const parts = Array.from(box.querySelectorAll('details.plan-day')).map(det=>{
+      const label = det.querySelector('summary')?.textContent || 'Gün';
+      const rows = Array.from(det.querySelectorAll('.plan-row')).map(row=>{
+        const cols = row.querySelectorAll('input');
+        return `<div class="slot"><div>${cols[0].value||'—'}</div><div>${cols[1].value||'—'}</div><div>${cols[2].value||'—'}</div></div>`;
+      }).join('');
+      return `<div class="day"><div class="day-title">${label}</div>${rows}</div>`;
+    }).join('');
+    return { studentName, html: parts };
+  }
+
+  function printPlan(source, mode){
+    const el = document.getElementById('printPlan');
+    if (!el) return;
+    el.innerHTML = header(source.studentName) + ensureDaysWrapper(source.html) + footer();
+    document.body.classList.remove('two-col','landscape','ultra');
+    if (mode==='twoCol') document.body.classList.add('two-col');
+    if (mode==='landscape'){
+      document.body.classList.add('landscape');
+      const st = document.createElement('style'); st.id='__page_landscape';
+      st.innerHTML='@page { size: A4 landscape; margin: 8mm; }';
+      document.head.appendChild(st);
+      setTimeout(()=>{ const x=document.getElementById('__page_landscape'); if(x) x.remove(); },0);
+    }
+    if (mode==='ultra') document.body.classList.add('ultra');
+    window.print();
+    setTimeout(()=> document.body.classList.remove('two-col','landscape','ultra'), 0);
+  }
+
+  function ensureButtons(){
+    const card = document.getElementById('weeklyPlanCard');
+    if (card && !card.querySelector('#btnPlanPdfDetail')){
+      const headerRow = card.querySelector(':scope > div');
+      const wrap = document.createElement('div');
+      wrap.style.display='flex'; wrap.style.gap='6px';
+      const b1 = document.createElement('button'); b1.className='btn'; b1.id='btnPlanPdfDetail'; b1.type='button'; b1.textContent='📄 PDF';
+      const b2 = document.createElement('button'); b2.className='btn'; b2.id='btnPlanPdfDetailTwoCol'; b2.type='button'; b2.textContent='📄 PDF 2 Sütun (Dikey)';
+      const b3 = document.createElement('button'); b3.className='btn'; b3.id='btnPlanPdfDetailLandscape'; b3.type='button'; b3.textContent='📄 PDF Yatay';
+      const b4 = document.createElement('button'); b4.className='btn'; b4.id='btnPlanPdfDetailUltra'; b4.type='button'; b4.textContent='📄 PDF Ultra (3 sütun)';
+      wrap.appendChild(b1); wrap.appendChild(b2); wrap.appendChild(b3); wrap.appendChild(b4);
+      headerRow && headerRow.appendChild(wrap);
+    }
+    const save = document.getElementById('wpSave');
+    if (save && !document.getElementById('wpPdf')){
+      const b1 = document.createElement('button'); b1.className='btn'; b1.id='wpPdf'; b1.type='button'; b1.textContent='📄 PDF';
+      const b2 = document.createElement('button'); b2.className='btn'; b2.id='wpPdfTwoCol'; b2.type='button'; b2.textContent='📄 PDF 2 Sütun (Dikey)';
+      const b3 = document.createElement('button'); b3.className='btn'; b3.id='wpPdfLandscape'; b3.type='button'; b3.textContent='📄 PDF Yatay';
+      const b4 = document.createElement('button'); b4.className='btn'; b4.id='wpPdfUltra'; b4.type='button'; b4.textContent='📄 PDF Ultra (3 sütun)';
+      save.parentNode.insertBefore(b1, save);
+      save.parentNode.insertBefore(b2, save);
+      save.parentNode.insertBefore(b3, save);
+      save.parentNode.insertBefore(b4, save);
+    }
+  }
+
+  function wire(){
+    ensureButtons();
+    // Modal
+    const mN = document.getElementById('wpPdf');
+    const mT = document.getElementById('wpPdfTwoCol');
+    const mL = document.getElementById('wpPdfLandscape');
+    const mU = document.getElementById('wpPdfUltra');
+    if (mN && !mN._wired){ mN._wired=true; mN.addEventListener('click', ()=> printPlan(buildFromModal(), 'normal')); }
+    if (mT && !mT._wired){ mT._wired=true; mT.addEventListener('click', ()=> printPlan(buildFromModal(), 'twoCol')); }
+    if (mL && !mL._wired){ mL._wired=true; mL.addEventListener('click', ()=> printPlan(buildFromModal(), 'landscape')); }
+    if (mU && !mU._wired){ mU._wired=true; mU.addEventListener('click', ()=> printPlan(buildFromModal(), 'ultra')); }
+    // Detay
+    const dN = document.getElementById('btnPlanPdfDetail');
+    const dT = document.getElementById('btnPlanPdfDetailTwoCol');
+    const dL = document.getElementById('btnPlanPdfDetailLandscape');
+    const dU = document.getElementById('btnPlanPdfDetailUltra');
+    if (dN && !dN._wired){ dN._wired=true; dN.addEventListener('click', ()=> printPlan(buildFromDetail(), 'normal')); }
+    if (dT && !dT._wired){ dT._wired=true; dT.addEventListener('click', ()=> printPlan(buildFromDetail(), 'twoCol')); }
+    if (dL && !dL._wired){ dL._wired=true; dL.addEventListener('click', ()=> printPlan(buildFromDetail(), 'landscape')); }
+    if (dU && !dU._wired){ dU._wired=true; dU.addEventListener('click', ()=> printPlan(buildFromDetail(), 'ultra')); }
+  }
+  document.addEventListener('DOMContentLoaded', wire);
+  new MutationObserver(wire).observe(document.body, { childList:true, subtree:true });
+  // expose
+  window.printPlan = printPlan;
+  window.__buildFromDetail = buildFromDetail;
+  window.__buildFromModal = buildFromModal;
+})();
+</script>
+
+</body>
+</html>
